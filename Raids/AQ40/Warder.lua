@@ -150,8 +150,8 @@ function module:BigWigs_RecvSync( sync, rest, nick )
 	elseif sync == syncName.dust then
 		if self.db.profile.dust then
 			self:RemoveBar(L["dustBar_next"])
-			self:Bar(L["dustBar"], timer.dustCast, icon.dust, true, "Yellow")
-			self:DelayedIntervalBar(timer.dustCast, L["dustBar_next"], timer.earliestDust-timer.dustCast, timer.latestDust-timer.dustCast, icon.dust, true, "Yellow")
+			self:Bar(L["dustBar"], timer.dustCast, icon.dust, true, "White")
+			self:DelayedIntervalBar(timer.dustCast, L["dustBar_next"], timer.earliestDust-timer.dustCast, timer.latestDust-timer.dustCast, icon.dust, true, "White")
 		end
 		self:AbilityWarn("dust")
 	end

@@ -220,7 +220,7 @@ function module:OnEngage()
 		self:DelayedMessage(timer.berserk - 5, L["berserkwarn3"], "Important", nil, nil, true)
 	end
 	if self.db.profile.wyvern then
-		self:IntervalBar(L["bartext"], timer.earliestFirstSting, timer.latestFirstSting, icon.sting)
+		self:IntervalBar(L["bartext"], timer.earliestFirstSting, timer.latestFirstSting, icon.sting, true, "blue")
 		self:DelayedMessage(timer.earliestFirstSting - 3, L["stingdelaywarn"], "Urgent", nil, nil, true)
 	end
 	if self.db.profile.frenzy then
@@ -306,7 +306,7 @@ function module:BigWigs_RecvSync(sync, rest, nick)
 	if sync == syncName.sting then
 		if self.db.profile.wyvern then
 			self:Message(L["stingwarn"], "Urgent")
-			self:IntervalBar(L["bartext"], timer.earliestSting, timer.latestSting, icon.sting)
+			self:IntervalBar(L["bartext"], timer.earliestSting, timer.latestSting, icon.sting, true, "blue")
 			self:DelayedMessage(timer.earliestSting - 3, L["stingdelaywarn"], "Urgent", nil, nil, true)
 		end
 	elseif sync == syncName.frenzy then

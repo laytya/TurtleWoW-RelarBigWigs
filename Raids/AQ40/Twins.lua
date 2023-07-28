@@ -272,7 +272,7 @@ function module:OnEngage()
 
 	if self.db.profile.enrage then
 		self:Message(L["startwarn"], "Important")
-		self:Bar(L["enragebartext"], timer.enrage, icon.enrage)
+		self:Bar(L["enragebartext"], timer.enrage, icon.enrage, true, "Black")
 
 		self:DelayedMessage(timer.enrage - 10 * 60, L["warn1"], "Attention", nil, nil, true)
 		self:DelayedMessage(timer.enrage - 5 * 60, L["warn2"], "Attention", nil, nil, true)
@@ -362,7 +362,7 @@ end
 
 function module:Teleport()
 	if self.db.profile.teleport then
-		self:IntervalBar(L["bartext"], timer.earliestTeleport, timer.latestTeleport, icon.teleport)
+		self:IntervalBar(L["bartext"], timer.earliestTeleport, timer.latestTeleport, icon.teleport, true, "White")
 
 		--self:DelayedSync(timer.teleport, syncName.teleport_old)
 		--self:DelayedSync(timer.teleport, syncName.teleport)

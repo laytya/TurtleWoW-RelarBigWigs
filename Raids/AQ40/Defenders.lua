@@ -134,7 +134,7 @@ end
 function module:BigWigs_RecvSync(sync, rest, nick)
 	if sync == syncName.explode and self.db.profile.explode then
 		self:Message(L["explodewarn"], "Important")
-		self:Bar(L["explodewarn"], timer.explode, icon.explode)
+		self:Bar(L["explodewarn"], timer.explode, icon.explode, true, "Red")
 		self:WarningSign("Spell_Shadow_MindBomb", timer.explode)
 		self:Sound("RunAway")
 	elseif sync == syncName.enrage and self.db.profile.enrage then
@@ -212,14 +212,14 @@ end
 
 function module:ArcaneReflect()
 	if firstarcref == true then
-		self:Bar(L["arcrefwarn"], timer.arcref, icon.arcref, true, "green")
+		self:Bar(L["arcrefwarn"], timer.arcref, icon.arcref, true, "red")
 		firstarcref = false
 	end
 end
 
 function module:ShadowReflect()
 	if firstsharef == true then 
-		self:Bar(L["sharefwarn"], timer.sharef, icon.sharef, true, "green")
+		self:Bar(L["sharefwarn"], timer.sharef, icon.sharef, true, "blue")
 		firstsharef = false
 	end
 end

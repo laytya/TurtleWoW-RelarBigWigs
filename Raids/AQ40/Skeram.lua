@@ -291,7 +291,7 @@ function module:BigWigs_RecvSync(sync, rest, nick)
 				self:Bar(string.format(L["mindcontrol_bar"], UnitName("player")), timer.mc, icon.mc, true, "White")
 				self:Message(L["mcplayer_message"], "Attention")
 			else
-				elf:Bar(string.format(L["mindcontrol_bar"], rest .. " >Click Me!<"), timer.mc, icon.mc, true, "White")
+				self:Bar(string.format(L["mindcontrol_bar"], rest .. " >Click Me!<"), timer.mc, icon.mc, true, "White")
 				self:SetCandyBarOnClick("BigWigsBar "..string.format(L["mindcontrol_bar"], rest .. " >Click Me!<"), function(name, button, extra) TargetByName(extra, true) end, rest)
 				self:Message(string.format(L["mcplayerother_message"], rest), "Urgent")
 			end

@@ -269,11 +269,11 @@ function module:OnEngage()
 	end
 	if self.db.profile.sandblast then
 		self:DelayedMessage(timer.earliestFirstSandblast - 5, L["sandblastwarn"], "Important", nil, nil, true)
-		self:IntervalBar(L["sandblastbartext"], timer.earliestFirstSandblast, timer.latestFirstSandblast, icon.sandblast)
+		self:IntervalBar(L["sandblastbartext"], timer.earliestFirstSandblast, timer.latestFirstSandblast, icon.sandblast, true, "Red")
 	end
 	if self.db.profile.sweep then
 		self:DelayedMessage(timer.earliestFirstSweep - 5, L["sweepwarn"], "Important", nil, nil, true)
-		self:IntervalBar(L["sweepbartext"], timer.earliestFirstSweep, timer.latestFirstSweep, icon.sweep)
+		self:IntervalBar(L["sweepbartext"], timer.earliestFirstSweep, timer.latestFirstSweep, icon.sweep, true, "Blue")
 		if self.db.profile.bigicon then
 			self:DelayedWarningSign(timer.earliestFirstSweep - 5, icon.sweep, 0.7)
 		end
@@ -379,10 +379,10 @@ end
 function module:Sweep()
 	if self.db.profile.sweep then
 		self:RemoveBar(L["sweepbartext"]) -- remove timer bar
-		self:Bar(L["sweepannounce"], timer.sweep, icon.sweep) -- show cast bar
+		self:Bar(L["sweepannounce"], timer.sweep, icon.sweep, true, "Blue") -- show cast bar
 		self:Message(L["sweepannounce"], "Important", true, "Alarm")
 		self:DelayedMessage(timer.sweepInterval - 5, L["sweepwarn"], "Important", nil, nil, true)
-		self:DelayedBar(timer.sweep, L["sweepbartext"], timer.sweepInterval-timer.sweep, icon.sweep) -- delayed timer bar
+		self:DelayedBar(timer.sweep, L["sweepbartext"], timer.sweepInterval-timer.sweep, icon.sweep, true, "Blue") -- delayed timer bar
 		if self.db.profile.bigicon then
 			self:DelayedWarningSign(timer.sweepInterval - 5, icon.sweep, 0.7)
 		end
@@ -392,10 +392,10 @@ end
 function module:Sandblast()
 	if self.db.profile.sandblast then
 		self:RemoveBar(L["sandblastbartext"]) -- remove timer bar
-		self:Bar(L["sandblastannounce"], timer.sandblast, icon.sandblast) -- show cast bar
+		self:Bar(L["sandblastannounce"], timer.sandblast, icon.sandblast, true, "Red") -- show cast bar
 		self:Message(L["sandblastannounce"], "Important", true, "Alert")
 		self:DelayedMessage(timer.earliestSandblastInterval - 5, L["sandblastwarn"], "Important", nil, nil, true)
-		self:DelayedIntervalBar(timer.sandblast, L["sandblastbartext"], timer.earliestSandblastInterval-timer.sandblast, timer.latestSandblastInterval-timer.sandblast, icon.sandblast) -- delayed timer bar
+		self:DelayedIntervalBar(timer.sandblast, L["sandblastbartext"], timer.earliestSandblastInterval-timer.sandblast, timer.latestSandblastInterval-timer.sandblast, icon.sandblast, true, "Red") -- delayed timer bar
 	end
 end
 
@@ -422,7 +422,7 @@ function module:Emerge()
 
 		if self.db.profile.sweep then
 			self:DelayedMessage(timer.sweepInterval - 5, L["sweepwarn"], "Important", nil, nil, true)
-			self:Bar(L["sweepbartext"], timer.sweepInterval, icon.sweep)
+			self:Bar(L["sweepbartext"], timer.sweepInterval, icon.sweep, true, "Blue")
 			if self.db.profile.bigicon then
 				self:DelayedWarningSign(timer.sweepInterval - 5, icon.sweep, 0.7)
 			end
@@ -430,7 +430,7 @@ function module:Emerge()
 
 		if self.db.profile.sandblast then
 			self:DelayedMessage(timer.earliestSandblastInterval - 5, L["sandblastwarn"], "Important", nil, nil, true)
-			self:IntervalBar(L["sandblastbartext"], timer.earliestSandblastInterval, timer.latestSandblastInterval, icon.sandblast)
+			self:IntervalBar(L["sandblastbartext"], timer.earliestSandblastInterval, timer.latestSandblastInterval, icon.sandblast, true, "Red")
 		end
 	end
 end
@@ -452,7 +452,7 @@ function module:Submerge()
 	if self.db.profile.submerge then
 		self:Message(L["submergeannounce"], "Important")
 		self:ScheduleEvent("bwsubmergewarn", "BigWigs_Message", timer.nextEmerge - 5, L["submergewarn"], "Important" )
-		self:Bar(L["submergebartext"], timer.nextEmerge, icon.submerge)
+		self:Bar(L["submergebartext"], timer.nextEmerge, icon.submerge, true, "White")
 		if self.db.profile.bigicon then
 			self:DelayedWarningSign(timer.nextEmerge-10, icon.collapse, 0.7)
 		end
@@ -484,7 +484,7 @@ end
 function module:PossibleSubmerge()
 	if self.db.profile.emerge then
 		self:DelayedMessage(timer.nextSubmerge -15, L["emergewarn"], "Important", nil, nil, true)
-		self:Bar(L["possible_submerge_bar"], timer.nextSubmerge, icon.submerge)
+		self:Bar(L["possible_submerge_bar"], timer.nextSubmerge, icon.submerge, true, "White")
 		if self.db.profile.bigicon then
 			self:DelayedWarningSign(timer.nextSubmerge-8, icon.submerge, 0.7)
 		end
