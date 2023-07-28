@@ -94,10 +94,11 @@ end
 function module:UNIT_HEALTH(arg1)
 	if UnitName(arg1) == module.translatedName then
 		local health = UnitHealth(arg1)
-		local maxHealth = UnitHealthMax(arg1)
-		if math.ceil(100*health/maxHealth) <= 70 and not p2 then
+		if health > 65 and health <= 70 and not p2 then
 			self:Sync(syncName.p2)
 			p2 = true
+		elseif health > 70 and p2 then
+			p2 = nil
 		end
 	end
 end

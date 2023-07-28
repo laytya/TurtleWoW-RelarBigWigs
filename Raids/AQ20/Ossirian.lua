@@ -71,7 +71,7 @@ local timer = {
 	warstomp = 30,
 	cyclone = 20,
 	clickit = 10,
-	firstcrystal = 10,
+	firstcrystal = 9,
 	firstWarstomp = 25,
 }
 
