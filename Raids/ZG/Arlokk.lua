@@ -184,7 +184,7 @@ function module:OnEngage()
 	if self.db.profile.phase then
 		self:Message(L["trollphase_message"], "Attention")
 	end
-	self:Bar(L["vanish_Nextbar"], timer.firstVanish, icon.vanish)
+	self:Bar(L["vanish_Nextbar"], timer.firstVanish, icon.vanish, true, "White")
 end
 
 -- called after boss is disengaged (wipe(retreat) or victory)
@@ -215,7 +215,7 @@ end
 
 function module:CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS(msg)
 	if msg == L["ww_trigger"] and self.db.profile.whirlwind then
-		self:Bar(L["ww_bar"], timer.whirlwind, icon.whirlwind)
+		self:Bar(L["ww_bar"], timer.whirlwind, icon.whirlwind, true, "Red")
 	end
 end
 
@@ -241,7 +241,7 @@ function module:PantherPhase()
 	self:CancelScheduledEvent("checkunvanish")
 	if self.db.profile.vanish then
 		self:RemoveBar(L["vanish_bar"])
-		self:Bar(L["vanish_Nextbar"], timer.vanish, icon.vanish)
+		self:Bar(L["vanish_Nextbar"], timer.vanish, icon.vanish, true, "White")
 	end
 	if self.db.profile.phase then
 		self:Message(L["pantherphase_message"], "Attention")

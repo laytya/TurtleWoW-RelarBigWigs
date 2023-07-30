@@ -160,7 +160,7 @@ function module:CheckPlague(msg)
 	local _,_, pplayer, ptype = string.find(msg, L["plaguetrigger"])
 	if pplayer then
 		if self.db.profile.plagueyou and pplayer == L["plagueyou"] then
-			self:SendSay(L["plague_onme"] .. UnitName("player") .. "!")
+			SendChatMessage("Plague on "..UnitName("player").."!","SAY")
 			self:Message(L["plagueyouwarn"], "Personal")
 			self:WarningSign(icon.plague, 5)
 			self:Sound("RunAway")

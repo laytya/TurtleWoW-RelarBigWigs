@@ -354,16 +354,16 @@ end
 function module:OnEngage()
 	self.phase = 1
 	if self.db.profile.fear then
-		self:Bar(L["fearreptext"], timer.firstFear, icon.fear)
+		self:Bar(L["fearreptext"], timer.firstFear, icon.fear, true, "White")
 	end
 	if self.db.profile.phase then
 		self:Message(L["phaseone_message"], "Attention")
 	end
-	self:Bar(L["First Silence"], timer.firstSilence, icon.silence)
+	self:Bar(L["First Silence"], timer.firstSilence, icon.silence, true, "Black")
 
 	-- bats
 	if self.db.profile.swarm then
-		self:Bar(L["swarm_bartext"], timer.bats, icon.bats);
+		self:Bar(L["swarm_bartext"], timer.bats, icon.bats, true, "Red")
 	end
 end
 
@@ -461,14 +461,14 @@ function module:BigWigs_RecvSync(sync, rest, nick)
 		end
 		if self.db.profile.fear then
 			self:RemoveBar(L["fearreptext"])
-			self:Bar(L["fearreptext"], timer.fear2, icon.fear2)
+			self:Bar(L["fearreptext"], timer.fear2, icon.fear2, true, "White")
 		end
-		self:Bar(L["Fire Bombs"], timer.fireBombs, icon.bomb)
+		self:Bar(L["Fire Bombs"], timer.fireBombs, icon.bomb, true, "Red")
 	elseif sync == syncName.fear and self.db.profile.fear then
-		self:Bar(L["fearreptext"], timer.fear, icon.fear)
+		self:Bar(L["fearreptext"], timer.fear, icon.fear, true, "White")
 	elseif sync == syncName.fear2 then
 		if self.db.profile.fear then
-			self:Bar(L["fearreptext"], timer.fear2, icon.fear2)
+			self:Bar(L["fearreptext"], timer.fear2, icon.fear2, true, "White")
 		end
 		if self.db.profile.heal then
 			self:RemoveBar(L["greathealbar"])
@@ -480,7 +480,7 @@ function module:BigWigs_RecvSync(sync, rest, nick)
 	elseif sync == syncName.mindflay then
 		if self.db.profile.flay then
 			self:RemoveBar(L["mindflaybar"])
-			self:Bar(L["mindflaybar"], timer.mindflay, icon.mindflay)
+			self:Bar(L["mindflaybar"], timer.mindflay, icon.mindflay, true, "Blue")
 		end
 		if self.db.profile.heal then
 			self:RemoveBar(L["greathealbar"])
@@ -493,14 +493,14 @@ function module:BigWigs_RecvSync(sync, rest, nick)
 		if self.db.profile.heal then
 			self:RemoveBar(L["Next Heal"])
 			self:Message(L["greathealtext"], "Important", "Alarm")
-			self:Bar(L["greathealbar"], timer.healCast, icon.heal)
+			self:Bar(L["greathealbar"], timer.healCast, icon.heal, true, "Green")
 		end
 	elseif sync == syncName.healOver then
 		self.castingheal = 0
 		if self.db.profile.heal then
 			self:RemoveBar(L["greathealbar"])
 			if (self.lastHeal + timer.nextHeal) > GetTime() then
-				self:Bar(L["Next Heal"], (self.lastHeal + timer.nextHeal - GetTime()), icon.heal)
+				self:Bar(L["Next Heal"], (self.lastHeal + timer.nextHeal - GetTime()), icon.heal, true, "Green")
 			end
 		end
 	end

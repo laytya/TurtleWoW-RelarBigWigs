@@ -260,9 +260,9 @@ function module:BigWigs_RecvSync(sync, rest, nick)
 			self:RemoveBar(L["pbv"])
 		end
 	elseif sync == syncName.volley and self.db.profile.volley then
-		self:Bar(L["pbv"], 13, "Spell_Nature_CorrosiveBreath")
+		self:Bar(L["pbv"], 13, "Spell_Nature_CorrosiveBreath", true, "Green")
 	elseif sync == syncName.drain and self.db.profile.drain then
-		self:Bar(L["drainlife"], 7, "Spell_Shadow_LifeDrain02")
+		self:Bar(L["drainlife"], 7, "Spell_Shadow_LifeDrain02", true, "Red")
 		self:Message(L["drainlife_message"], "Attention")
 	elseif sync == syncName.drainOver and self.db.profile.drain then
 		self:RemoveBar(L["drainlife"])

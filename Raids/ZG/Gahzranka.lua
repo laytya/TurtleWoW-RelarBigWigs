@@ -97,7 +97,7 @@ end
 
 function module:CHAT_MSG_SPELL_CREATURE_VS_CREATURE_DAMAGE(msg)
 	if msg == L["frostbreath_trigger"] and self.db.profile.frostbreath then
-		self:Bar(L["frostbreath_bar"], timer.breath, icon.breath)
+		self:Bar(L["frostbreath_bar"], timer.breath, icon.breath, true, "Blue")
 	elseif msg == L["massivegeyser_trigger"] and self.db.profile.massivegeyser then
 		self:Bar(L["massivegeyser_bar"], timer.geyser, icon.geyser, true, "White")
 	end

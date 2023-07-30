@@ -87,6 +87,7 @@ local timer = {
 }
 local icon = {
 	dismember = "ability_backstab",
+	follow = "spell_fire_incinerate",
 }
 local syncName = {
 	dismember = "BuruDismember",
@@ -132,6 +133,7 @@ function module:CHAT_MSG_MONSTER_EMOTE( msg )
 			player = UnitName("player")
 			self:Message(L["watchwarnyou"], "Personal", true, "RunAway")
 			self:Message(UnitName("player") .. L["watchwarn"], "Attention", nil, nil, true)
+			self:WarningSign(icon.follow, 1)
 		elseif self.db.profile.other then
 			self:Message(player .. L["watchwarn"], "Attention")
 			self:TriggerEvent("BigWigs_SendTell", player, L["watchwarnyou"])

@@ -217,7 +217,7 @@ end
 
 -- called after boss is engaged
 function module:OnEngage()
-	self:Bar("Next Hex", timer.firstHex, icon.hex)
+	self:Bar("Next Hex", timer.firstHex, icon.hex, true, "White")
 	--self:Bar("Next Healing Ward", timer.firstHealing, icon.healing)
 	--self:Bar("Next Brain Wash", timer.firstBrainwash, icon.brainwash)
 end
@@ -311,7 +311,7 @@ function module:BigWigs_RecvSync(sync, rest, nick)
 	elseif sync == syncName.hex and self.db.profile.hex then
 		self:RemoveBar("Next Hex")
 		self:Message(string.format(L["hexwarn_warning"], rest), "Important")
-		self:Bar(string.format(L["hex_bar"], rest), timer.hex, icon.hex, true, "White")
+		self:Bar(string.format(L["hex_bar"], rest), timer.hex, icon.hex, true, "Green")
 	elseif sync == syncName.hexOver and self.db.profile.hex then
 		self:RemoveBar(string.format(L["hex_bar"], rest))
 	end
