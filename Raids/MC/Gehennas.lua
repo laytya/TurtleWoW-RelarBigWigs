@@ -180,7 +180,7 @@ end
 function module:OnEngage()
 	if self.db.profile.curse then
 		self:DelayedMessage(timer.firstCurse - 5, L["curse_warn_soon"], "Urgent", nil, nil, true)
-		self:Bar(L["curse_bar"], timer.firstCurse, icon.curse)
+		self:Bar(L["curse_bar"], timer.firstCurse, icon.curse, true, "Blue")
 	end
 	--self:Bar(L["barNextRain"], timer.firstRain, icon.rain)
 end
@@ -236,7 +236,7 @@ end
 function module:BigWigs_RecvSync(sync, rest, nick)
 	if sync == syncName.curse and self.db.profile.curse then
 		self:DelayedMessage(timer.earliestCurse - 5, L["curse_warn_soon"], "Urgent", nil, nil, true)
-		self:IntervalBar(L["curse_bar"], timer.earliestCurse, timer.latestCurse, icon.curse)
+		self:IntervalBar(L["curse_bar"], timer.earliestCurse, timer.latestCurse, icon.curse, true, "Blue")
 	elseif sync == syncName.add and rest and rest ~= "" then
 		rest = tonumber(rest)
 		if rest <= 2 and flamewaker < rest then
