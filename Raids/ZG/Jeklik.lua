@@ -54,7 +54,11 @@ L:RegisterTranslations("enUS", function() return {
 	firewarnyou = "Move away from fire!",
 	you = "you",
 	HighPriestessJeklik = "High Priestess Jeklik",
-
+	
+	silence_trigger = "is afflicted by Sonic Burst",
+	silence_bar = "Silence CD",
+	silenced_bar = "People are silenced",
+	
 	["Next Heal"] = true,
 	["Fire Bombs"] = true,
 	["First Silence"] = true,
@@ -269,6 +273,8 @@ local timer = {
 	firstFear = 12,
 	fear = 30,
 	firstSilence = 12,
+	silenceCD = 20,
+	silenceDur = 10
 	healCast = 4,
 	nextHeal = 20,
 	fear2 = 39.5,
@@ -295,6 +301,7 @@ local syncName = {
 	healOver = "JeklikHealStop"..module.revision,
 	bombBats = "JeklikBombBats"..module.revision,
 	swarmBats = "JeklikSwarmBats"..module.revision,
+	silence = "JeklikSilence"..module.revision,
 }
 
 local berserkannounced = nil
@@ -391,6 +398,8 @@ function module:Event(msg)
 		end
 	elseif string.find(msg, L["heal_trigger"]) then
 		self:Sync(syncName.heal)
+	elseif string.find(msg, L["silence_trigger"]) then
+		self:Sync(syncName.silence)
 	elseif string.find(msg, L["phasetwo_trigger"]) then
 		self:Sync("JeklikPhaseTwo")
 	elseif string.find(msg, L["mindflayyou_trigger"]) then
@@ -462,8 +471,12 @@ function module:BigWigs_RecvSync(sync, rest, nick)
 		if self.db.profile.fear then
 			self:RemoveBar(L["fearreptext"])
 			self:Bar(L["fearreptext"], timer.fear2, icon.fear2, true, "White")
+			self:RemoveBar(L["silenced_bar"])
+			self:CancelDelayedBar(L["silence_bar"])
 		end
 		self:Bar(L["Fire Bombs"], timer.fireBombs, icon.bomb, true, "Red")
+	elseif sync == syncName.silence then
+		self:Silence()
 	elseif sync == syncName.fear and self.db.profile.fear then
 		self:Bar(L["fearreptext"], timer.fear, icon.fear, true, "White")
 	elseif sync == syncName.fear2 then
@@ -504,4 +517,9 @@ function module:BigWigs_RecvSync(sync, rest, nick)
 			end
 		end
 	end
+end
+
+function module:Silence()
+	self:Bar(L["silenced_bar"], timer.silenceDur, icon.silence, true, "White")
+	self:DelayedBar(timer.silenceDur, L["silence_bar"], timer.silenceCD, icon.silence, true, "White")
 end
