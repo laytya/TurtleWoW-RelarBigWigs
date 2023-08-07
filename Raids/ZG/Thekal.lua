@@ -398,6 +398,7 @@ function module:CheckForBossDeath(msg)
 		BigWigs:CheckForBossDeath(msg, self)
 	end
 end
+
 function module:CHAT_MSG_MONSTER_YELL(msg)
 	if string.find(msg, L["phase2_trigger"]) then
 		self:Sync(syncName.phase2)
@@ -472,7 +473,7 @@ end
 
 function module:CHAT_MSG_SPELL_CREATURE_VS_CREATURE_DAMAGE(msg)
 	if msg == L["forcepunch_trigger"] then
-		self:Bar(L["forcepunch_bar"], timer.forcePunch, icon.forcePunch)
+		self:Bar(L["forcepunch_bar"], timer.forcePunch, icon.forcePunch, true, "red")
 	end
 end
 
@@ -514,18 +515,18 @@ function module:BigWigs_RecvSync(sync, rest, nick)
 	elseif sync == syncName.phasechange then
 		self:CancelScheduledEvent("checkphasechange")
 		self.phase = 1.5
-		self:Bar(L["phasetwo_bar"], timer.phase2, icon.phase2)
+		self:Bar(L["phasetwo_bar"], timer.phase2, icon.phase2, true, "White")
 	elseif sync == syncName.heal and self.db.profile.heal then
 		self:Message(L["heal_message"], "Attention", "Alarm")
-		self:Bar(L["heal_bar"], 4, icon.heal, true, "Black")
+		self:Bar(L["heal_bar"], 4, icon.heal, true, "Blue")
 	elseif sync == syncName.frenzy and self.db.profile.frenzy then
 		self:Message(L["frenzyann"], "Important", true, "Alarm")
-		self:Bar(L["frenzy_bar"], 8, icon.frenzy, true, "Black")
+		self:Bar(L["frenzy_bar"], 8, icon.frenzy, true, "cyan")
 	elseif sync == syncName.frenzyOver and self.db.profile.frenzy then
 		self:RemoveBar(L["frenzy_bar"])
 	elseif sync == syncName.bloodlust and self.db.profile.bloodlust then
 		self:Message(string.format(L["bloodlustannounce"], rest), "Important")
-		self:Bar(string.format(L["bloodlust_bar"], rest), 30, icon.bloodlust)
+		self:Bar(string.format(L["bloodlust_bar"], rest), 30, icon.bloodlust, true, "cyan")
 	elseif sync == syncName.bloodlustOver and self.db.profile.bloodlust then
 		self:RemoveBar(string.format(L["bloodlust_bar"], rest))
 	elseif sync == syncName.silence and self.db.profile.silence then
@@ -534,7 +535,7 @@ function module:BigWigs_RecvSync(sync, rest, nick)
 	elseif sync == syncName.silenceOver and self.db.profile.silence then
 		self:RemoveBar(string.format(L["silence_bar"], rest))
 	elseif sync == syncName.mortalcleave and self.db.profile.cleave then
-		self:Bar(string.format(L["mortalcleave_bar"], rest), 5, icon.mortalCleave)
+		self:Bar(string.format(L["mortalcleave_bar"], rest), 5, icon.mortalCleave, true, "black")
 	elseif sync == syncName.disarm and self.db.profile.disarm then
 		self:Bar(string.format(L["disarm_bar"], rest), 5, icon.disarm, true, "Yellow")
 	elseif sync == syncName.enrage and self.db.profile.enraged then
@@ -547,11 +548,11 @@ function module:TigerPhase()
 		self:RemoveBar(L["heal_bar"])
 	end
 	if self.db.profile.bloodlust then
-		self:Bar(L["Next Bloodlust"], timer.bloodlust, icon.bloodlust)
+		self:Bar(L["Next Bloodlust"], timer.bloodlust, icon.bloodlust, true, "cyan")
 	end
 	if self.db.profile.phase then
 		self:Message(L["phasetwo_message"], "Attention")
 	end
-	self:Bar(L["New Adds"], timer.adds, icon.adds)
-	self:Bar(L["Knockback"], timer.knockback, icon.knockback)
+	self:Bar(L["New Adds"], timer.adds, icon.adds, true, "blue")
+	self:Bar(L["Knockback"], timer.knockback, icon.knockback, true, "red")
 end

@@ -55,11 +55,7 @@ function module:OnDisengage()
 end
 
 function module:Emote(msg)
-	DEFAULT_CHAT_FRAME:AddMessage("msg="..msg)
 	if msg == L["explodingTrigger"] or msg == L["explodingTrigger2"] then
-		
-		DEFAULT_CHAT_FRAME:AddMessage("explodingTrigger")
-		
 		self:Bar(L["explodingBar"], timer.exploding, icon.exploding, true, "Red")
 		self:Message(L["explodingMsg"], "Important")
 		if self.db.profile.bigicon then

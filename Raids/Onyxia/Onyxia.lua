@@ -324,7 +324,7 @@ end
 function module:Phase3()
 	if self.db.profile.phase and phase < 3 then
 		self:Message(L["phase3text"], "Important", true, "Beware")
-		self:Bar(L["fear_next"], timer.firstFear + timer.fearCast, icon.fear)
+		self:Bar(L["fear_next"], timer.firstFear + timer.fearCast, icon.fear, true, "blue")
 		phase = 3
 	end
 end
@@ -339,7 +339,7 @@ end
 
 function module:FlameBreath()
 	if self.db.profile.flamebreath then
-		self:Bar(L["flamebreath_cast"], 2, "Spell_Fire_Fire")
+		self:Bar(L["flamebreath_cast"], 2, "Spell_Fire_Fire", true, "red")
 	end
 end
 
@@ -372,7 +372,7 @@ function module:Fear()
 
 		self:Message(L["feartext"], "Important", true, "Alarm")
 		self:Bar(L["fear_cast"], timer.fearCast, icon.fear, true, "white") -- add cast bar
-		self:DelayedBar(timer.fearCast, L["fear_next"], timer.fear, icon.fear) -- delayed timer bar
+		self:DelayedBar(timer.fearCast, L["fear_next"], timer.fear, icon.fear, true, "blue") -- delayed timer bar
 		self:WarningSign(icon.fear, 5)
 	end
 end

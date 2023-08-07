@@ -338,7 +338,7 @@ function module:Event(msg)
 			self:Sound("Beware")
 		end
 		if self.db.profile.bigicon then
-			self:WarningSign(icon.gaze, timer.gazed)
+			self:WarningSign(icon.gaze, 7)
 		end
 		gazetime = GetTime()
 		self:Sync(syncName.gazeAfflicted .. " " .. UnitName("player"))
