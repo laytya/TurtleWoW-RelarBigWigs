@@ -336,7 +336,7 @@ function module:OnEngage()
 		self:Message(L["start_message"], "Attention")
 	end
 	if self.db.profile.mobs then
-		self:Bar(L["mobs_bar"], timer.mobspawn, icon.mobspawn)
+		self:Bar(L["mobs_bar"], timer.mobspawn, icon.mobspawn, true, "White")
 		self:Message(timer.mobspawn - 5, L["mobs_soon"], "Important")
 	end
 	self:TriggerEvent("BigWigs_StartCounterBar", self, L["Eggs destroyed"], 30, "Interface\\Icons\\inv_egg_01")

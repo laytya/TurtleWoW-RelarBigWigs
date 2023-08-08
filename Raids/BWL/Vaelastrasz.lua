@@ -245,6 +245,7 @@ function module:CheckForEngage()
 		BigWigs:CheckForEngage(self)
 	end
 end
+
 function module:CHAT_MSG_SPELL_CREATURE_VS_CREATURE_DAMAGE(msg)
 	if msg == L["flamebreath_trigger"] then
 		self:Sync(syncName.flamebreath)
