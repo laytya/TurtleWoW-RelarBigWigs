@@ -1,13 +1,9 @@
-----------------------------------
---      Module Declaration      --
-----------------------------------
 
 local module, L = BigWigs:ModuleDeclaration("Maexxna", "Naxxramas")
 
-
-----------------------------
---      Localization      --
-----------------------------
+module.revision = 30008
+module.enabletrigger = module.translatedName
+module.toggleoptions = { "spray", "poison", "cocoon", "bosskill" }
 
 L:RegisterTranslations("enUS", function()
     return {
@@ -17,9 +13,9 @@ L:RegisterTranslations("enUS", function()
         spray_name = "Web Spray Alert",
         spray_desc = "Warn for webspray and spiders",
 
-        --enrage_cmd = "enrage",
-        --enrage_name = "Enrage Alert",
-        --enrage_desc = "Warn for enrage",
+        enrage_cmd = "enrage",
+        enrage_name = "Enrage Alert",
+        enrage_desc = "Warn for enrage",
 
         cocoon_cmd = "cocoon",
         cocoon_name = "Cocoon Alert",
@@ -43,9 +39,6 @@ L:RegisterTranslations("enUS", function()
         webspraywarn10sec = "10 seconds until Web Spray!",
         webspraywarn5sec = "AOE - Spiders Spawn - AOE! WEB SPRAY 5 SECONDS!",
         webspraywarn = "Web Spray! 40 seconds until next!",
-
-        --enragewarn = "Enrage - SQUISH SQUISH SQUISH!",
-        --enragesoonwarn = "Enrage Soon - Bug Swatters out!",
 
         webspraybar = "Web Spray",
         cocoonbar = "Cocoons",
@@ -104,20 +97,9 @@ L:RegisterTranslations("esES", function()
         are = "estás",
     }
 end)
----------------------------------
---      	Variables 		   --
----------------------------------
 
--- module variables
-module.revision = 20011 -- To be overridden by the module!
-module.enabletrigger = module.translatedName -- string or table {boss, add1, add2}
---module.wipemobs = { L["add_name"] } -- adds which will be considered in CheckForEngage
-module.toggleoptions = { "spray", "poison", "cocoon", "bosskill" }
-
-
--- locals
 local timer = {
-    poison = { 10, 25 },
+    poison = { 8.5, 25 },
     firstPoison = 10,
     cocoon = 20,
     spider = 30,
@@ -128,27 +110,22 @@ local icon = {
     cocoon = "Spell_Nature_Web",
     poison = "Ability_Creature_Poison_03",
     webspray = "Ability_Ensnare",
-    --enrage = "Spell_shadow_unholyfrenzy",
+    enrage = "Spell_shadow_unholyfrenzy",
 }
 local syncName = {
     webspray = "MaexxnaWebspray" .. module.revision,
     poison = "MaexxnaPoison" .. module.revision,
     cocoon = "MaexxnaCocoon" .. module.revision,
-    --enrage = "MaexxnaEnrage" .. module.revision,
-    --enragePercLeft = "MaexxnaEnragePercLeft" .. module.revision,
+    enrage = "MaexxnaEnrage" .. module.revision,
 }
 
 local times = {}
---local enrageannounced = false
 
-------------------------------
---      Initialization      --
-------------------------------
+local enrageannounced = false
 
--- called after module is enabled
 function module:OnEnable()
     --self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS", "EnrageEvent")
-    --self:RegisterEvent("UNIT_HEALTH", "HealthEvent")
+    self:RegisterEvent("UNIT_HEALTH")
 
     self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE", "SprayEvent")
     self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE", "SprayEvent")
@@ -157,40 +134,35 @@ function module:OnEnable()
     self:ThrottleSync(8, syncName.webspray)
     self:ThrottleSync(5, syncName.poison)
     self:ThrottleSync(0, syncName.cocoon)
-    -- the MaexxnaCocoon sync is left unthrottled, it's throttled inside the module itself
-    -- because the web wrap happens to a lot of players at once.
-    --self:ThrottleSync(1, syncName.enrage)
-    --self:ThrottleSync(1, syncName.enragePercLeft)
 end
 
--- called after module is enabled and after each wipe
 function module:OnSetup()
-    --enrageannounced = false
+    enrageannounced = false
     times = {}
 end
 
--- called after boss is engaged
 function module:OnEngage()
     self:Message(L["poisonwarn"], "Important")
-    self:IntervalBar(L["poisonbar"], timer.poison[1], timer.poison[2], icon.poison)
-    --self:Bar(L["poisonbar"], timer.firstPoison, icon.poison)
+    self:IntervalBar(L["poisonbar"], timer.poison[1], timer.poison[2], icon.poison, true, "Green")
     self:Webspray()
-
-    --self:TriggerEvent("BigWigs_StartHPBar", self, "% to Enrage", 100)
-    --self:TriggerEvent("BigWigs_SetHPBar", self, "% to Enrage", 70)
 end
 
--- called after boss is disengaged (wipe(retreat) or victory)
 function module:OnDisengage()
 end
 
-
-------------------------------
---      Initialization      --
-------------------------------
+function module:UNIT_HEALTH(arg1)
+	if UnitName(arg1) == module.translatedName then
+		local health = UnitHealth(arg1)
+		if health > 25 and health <= 30 and not enrageannounced then
+			self:Sync(syncName.enrage)
+			enrageannounced = true
+		elseif health > 30 and enrageannounced then
+			enrageannounced = nil
+		end
+	end
+end
 
 function module:SprayEvent(msg)
-    -- web spray warning
     if string.find(msg, L["webspraytrigger"]) then
         self:Sync(syncName.webspray)
     elseif string.find(msg, L["poisontrigger"]) then
@@ -209,22 +181,6 @@ function module:SprayEvent(msg)
     end
 end
 
---function module:EnrageEvent(msg)
---    self:Sync(syncName.enrage)
---end
-
---function module:HealthEvent(msg)
---    if UnitExists('target') then
---        if UnitName('target') == 'Maexxna' and msg == 'target' then
---            self:Sync(syncName.enragePercLeft .. " " .. 100 + 30 - UnitHealth('target'))
---        end
---    end
---end
-
-------------------------------
---      Synchronization	    --
-------------------------------
-
 function module:BigWigs_RecvSync(sync, rest)
     if sync == syncName.webspray then
         self:Webspray()
@@ -232,39 +188,22 @@ function module:BigWigs_RecvSync(sync, rest)
         self:Poison()
     elseif sync == syncName.cocoon and rest then
         self:Cocoon(rest)
-    --elseif sync == syncName.enrage then
-    --    self:Enrage()
-    --elseif sync == syncName.enragePercLeft and rest then
-    --    self:Health(tonumber(rest))
+    elseif sync == syncName.enrage then
+        self:Enrage()
     end
 end
 
-
-------------------------------
---      Sync Handlers	    --
-------------------------------
-
 function module:Webspray()
-    --self:CancelDelayedMessage(L["webspraywarn30sec"])
-    --self:CancelDelayedMessage(L["webspraywarn20sec"])
-    --self:CancelDelayedMessage(L["webspraywarn10sec"])
-    --self:CancelDelayedMessage(L["webspraywarn5sec"])
-
     self:Message(L["webspraywarn"], "Important")
-    self:Bar(L["cocoonbar"], timer.cocoon, icon.cocoon)
-    self:Bar(L["spiderbar"], timer.spider, icon.spider)
-    self:Bar(L["webspraybar"], timer.webspray, icon.webspray)
-
-    --self:DelayedMessage(timer.webspray - 30, L["webspraywarn30sec"], "Attention")
-    --self:DelayedMessage(timer.webspray - 20, L["webspraywarn20sec"], "Attention")
-    --self:DelayedMessage(timer.webspray - 10, L["webspraywarn10sec"], "Attention")
-    --self:DelayedMessage(timer.webspray - 5, L["webspraywarn5sec"], "Attention")
+    self:Bar(L["cocoonbar"], timer.cocoon, icon.cocoon, true, "blue")
+    self:Bar(L["spiderbar"], timer.spider, icon.spider, true, "red")
+    self:Bar(L["webspraybar"], timer.webspray, icon.webspray, true, "white")
 end
 
 function module:Poison()
     if self.db.profile.poison then
         self:Message(L["poisonwarn"], "Important")
-        self:IntervalBar(L["poisonbar"], timer.poison[1], timer.poison[2], icon.poison)
+        self:IntervalBar(L["poisonbar"], timer.poison[1], timer.poison[2], icon.poison, true, "Green")
     end
 end
 
@@ -278,18 +217,7 @@ function module:Cocoon(player)
     end
 end
 
---function module:Enrage()
---    self:Message("Maexxna becomes Enraged !", "Important")
---end
-
---function module:Health(perc)
---
---    self:TriggerEvent("BigWigs_SetHPBar", self, "% to Enrage", perc)
---
---    if perc == 40 then
---        self:Message("Enrage in 10% !", "Important")
---    end
---    if perc == 35 then
---        self:Message("Enrage in 5% !", "Important")
---    end
---end
+function module:Enrage()
+    self:Message("Maexxna becomes Enraged !", "Important")
+	self:WarningSign(icon.enrage, 0.7)
+end
