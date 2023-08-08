@@ -65,7 +65,7 @@ L:RegisterTranslations("enUS", function() return {
 	enrageremovewarn = "Enrage removed! %d seconds until next!",
 
 	raidSilence_trigger = "You are afflicted by Silence",
-	raidSilence_bar = "Silenced",
+	raidSilence_bar = "Raid member Silenced",
 	
 	poison_trigger = "is afflicted by Poison Bolt Volley",
 	
