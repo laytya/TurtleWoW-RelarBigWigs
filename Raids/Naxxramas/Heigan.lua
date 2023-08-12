@@ -1,14 +1,9 @@
 
-----------------------------------
---      Module Declaration      --
-----------------------------------
-
 local module, L = BigWigs:ModuleDeclaration("Heigan the Unclean", "Naxxramas")
 
-
-----------------------------
---      Localization      --
-----------------------------
+module.revision = 20011
+module.enabletrigger = module.translatedName
+module.toggleoptions = {"engage", "teleport", "disease", "erruption", "bosskill"}
 
 L:RegisterTranslations("enUS", function() return {
 	cmd = "Heigan",
@@ -29,35 +24,33 @@ L:RegisterTranslations("enUS", function() return {
 	erruption_name = "Erruption Alert",
 	erruption_desc = "Warn for Erruption",
 
-	-- [[ Triggers ]]--
+
 	starttrigger = "You are mine now!",
 	starttrigger2 = "You...are next!",
 	starttrigger3 = "I see you!",
+	
 	toPlatform_trigger1 = "teleports and begins to channel a spell!",
 	toPlatform_trigger2 = "The end is upon you.",
-	toFloor_trigger = "rushes to attack once more!",
-	die_trigger = "takes his last breath.",
-	dtrigger = "afflicted by Decrepit Fever.",
-
-	-- [[ Warnings ]]--
-	engage_message = "Heigan the Unclean engaged!",
-
-	dwarn = "Decrepit Fever",
-
 	on_platform_message = "Teleport! Dancing for %d sec!",
-
+	toPlatform_bar = "Teleport!",
+	
+	toFloor_trigger = "rushes to attack once more!",
 	to_floor_30sec_message = "Back in 30 sec",
 	to_floor_10sec_message = "Back in 10 sec!",
 	on_floor_message = "Back on the floor! 90 sec to next teleport!",
-
-	-- [[ Bars ]]--
-	toPlatform_bar = "Teleport!",
 	toFloor_bar = "Back on the floor!",
+	
+	die_trigger = "takes his last breath.",
+	
+	dtrigger = "afflicted by Decrepit Fever.",
+	dwarn = "Decrepit Fever",
 	dbar = "Decrepit Fever",
+	
+	engage_message = "Heigan the Unclean engaged!",
+
 	erruptionbar = "Eruption",
 	dancingshoes = "Put on your dancing shoes!",
 
-	-- [[ Dream Room Mobs ]] --
 	["Eye Stalk"] = true,
 	["Rotting Maggot"] = true,
 } end )
@@ -113,18 +106,7 @@ L:RegisterTranslations("esES", function() return {
 	["Eye Stalk"] = "Ojo acechador",
 	["Rotting Maggot"] = "Cresa en podredumbre",
 } end )
----------------------------------
---      	Variables 		   --
----------------------------------
 
--- module variables
-module.revision = 20011 -- To be overridden by the module!
-module.enabletrigger = module.translatedName -- string or table {boss, add1, add2}
---module.wipemobs = { L["Eye Stalk"], L["Rotting Maggot"] } -- adds which will be considered in CheckForEngage
-module.toggleoptions = {"engage", "teleport", "disease", "erruption", "bosskill"}
-
-
--- locals
 local timer = {
 	firstDisease = 30,
 	firstDiseaseAfterDance = 5,
@@ -150,6 +132,7 @@ local syncName = {
 	toFloor = "HeiganToFloor"..module.revision,
 	disease = "HeiganDisease"..module.revision,
 }
+
 local eruption_count = 1
 local eruption_dir = 1
 
@@ -157,15 +140,10 @@ function eruption_help(inp)
 	return ' ! Run to ' .. inp .. ' !'
 end
 
-------------------------------
---      Initialization      --
-------------------------------
-
 module:RegisterYellEngage(L["starttrigger"])
 module:RegisterYellEngage(L["starttrigger2"])
 module:RegisterYellEngage(L["starttrigger3"])
 
--- called after module is enabled
 function module:OnEnable()
 	self:RegisterEvent("CHAT_MSG_MONSTER_EMOTE")
 	self:RegisterEvent("CHAT_MSG_RAID_BOSS_EMOTE", "Teleport")
@@ -180,36 +158,28 @@ function module:OnEnable()
 	self:ThrottleSync(5, syncName.disease)
 end
 
--- called after module is enabled and after each wipe
 function module:OnSetup()
 end
 
--- called after boss is engaged
 function module:OnEngage()
 	if self.db.profile.teleport then
-		self:Bar(L["toPlatform_bar"], timer.toPlatform, icon.toPlatform)
+		self:Bar(L["toPlatform_bar"], timer.toPlatform, icon.toPlatform, true, "White")
 	end
 	if self.db.profile.disease then
-		self:Bar(L["dbar"], timer.firstDisease, icon.disease)
+		self:Bar(L["dbar"], timer.firstDisease, icon.disease, true, "Green")
 	end
 	if self.db.profile.erruption then
 		eruption_count = 1
 		eruption_dir = 1
 
 		timer.erruption = timer.erruptionSlow
-		self:Bar(L["erruptionbar"] .. eruption_help(eruption_count), timer.firstErruption, icon.erruption)
+		self:Bar(L["erruptionbar"] .. eruption_help(eruption_count), timer.firstErruption, icon.erruption, true, "Red")
 		self:ScheduleEvent("HeiganErruption", self.Erruption, timer.firstErruption, self)
 	end
 end
 
--- called after boss is disengaged (wipe(retreat) or victory)
 function module:OnDisengage()
 end
-
-
-------------------------------
---      Event Handlers      --
-------------------------------
 
 function module:CHAT_MSG_MONSTER_EMOTE( msg )
 	if string.find(msg, L["die_trigger"]) then
@@ -248,23 +218,19 @@ function module:Erruption()
 		if registered and timer and elapsed then
 			local remaining = time - elapsed
 			if timer.erruption + 1 < remaining then
-				self:Bar(L["erruptionbar"] .. eruption_help(eruption_count), timer.erruption, icon.erruption)
+				self:Bar(L["erruptionbar"] .. eruption_help(eruption_count), timer.erruption, icon.erruption, true, "Red")
 				self:ScheduleEvent("HeiganErruption", self.Erruption, timer.erruption, self)
 			else
 				self:Sound("Beware")
-				self:Bar(L["dancingshoes"], timer.dancing, icon.dancing)
+				self:Bar(L["dancingshoes"], timer.dancing, icon.dancing, true, "Blue")
 			end
 		else
-			self:Bar(L["erruptionbar"] .. eruption_help(eruption_count), timer.erruption, icon.erruption)
+			self:Bar(L["erruptionbar"] .. eruption_help(eruption_count), timer.erruption, icon.erruption, true, "Red")
 			self:ScheduleEvent("HeiganErruption", self.Erruption, timer.erruption, self)
 		end
 
 	end
 end
-
-------------------------------
---      Synchronization	    --
-------------------------------
 
 function module:BigWigs_RecvSync(sync, rest, nick)
 	if sync == syncName.disease then
@@ -276,10 +242,6 @@ function module:BigWigs_RecvSync(sync, rest, nick)
 	end
 end
 
-------------------------------
---      Sync Handlers	    --
-------------------------------
-
 function module:Disease()
 	if self.db.profile.disease then
 		self:Message(L["dwarn"], "Important")
@@ -289,7 +251,7 @@ function module:Disease()
 		if time and elapsed then
 			local remaining = time - elapsed
 			if timer.disease[1] < remaining then
-				self:IntervalBar(L["dbar"], timer.disease[1], timer.disease[2], icon.disease)
+				self:IntervalBar(L["dbar"], timer.disease[1], timer.disease[2], icon.disease, true, "Green")
 			end
 		end
 	end
@@ -298,7 +260,7 @@ end
 function module:ToPlatform()
 	if self.db.profile.teleport then
 		self:Message(string.format(L["on_platform_message"], timer.toFloor), "Attention")
-		self:Bar(L["toFloor_bar"], timer.toFloor, icon.toFloor)
+		self:Bar(L["toFloor_bar"], timer.toFloor, icon.toFloor, true, "White")
 	end
 	if self.db.profile.erruption then
 		self:CancelScheduledEvent("HeiganErruption")
@@ -306,7 +268,7 @@ function module:ToPlatform()
 		eruption_count = 1
 
 		timer.erruption = timer.erruptionFast
-		self:Bar(L["erruptionbar"] .. eruption_help(eruption_count), timer.firstDanceErruption, icon.erruption)
+		self:Bar(L["erruptionbar"] .. eruption_help(eruption_count), timer.firstDanceErruption, icon.erruption, true, "Red")
 		self:ScheduleEvent("HeiganErruption", self.Erruption, timer.firstDanceErruption, self)
 	end
 	self:ScheduleEvent("bwHeiganToFloor",  self.ToFloor, timer.toFloor, self )
@@ -317,10 +279,10 @@ function module:ToFloor()
 
 	if self.db.profile.teleport then
 		self:Message(L["on_floor_message"], "Attention")
-		self:Bar(L["toPlatform_bar"], timer.toPlatform, icon.toPlatform)
+		self:Bar(L["toPlatform_bar"], timer.toPlatform, icon.toPlatform, true, "White")
 	end
 	if self.db.profile.disease then
-		self:Bar(L["dbar"], timer.firstDiseaseAfterDance, icon.disease)
+		self:Bar(L["dbar"], timer.firstDiseaseAfterDance, icon.disease, true, "Green")
 	end
 	if self.db.profile.erruption then
 		self:CancelScheduledEvent("HeiganErruption")
@@ -328,76 +290,7 @@ function module:ToFloor()
 		eruption_count = 1
 
 		timer.erruption = timer.erruptionSlow
-		self:Bar(L["erruptionbar"] .. eruption_help(eruption_count), timer.erruption, icon.erruption)
+		self:Bar(L["erruptionbar"] .. eruption_help(eruption_count), timer.erruption, icon.erruption, true, "Red")
 		self:ScheduleEvent("HeiganErruption", self.Erruption, timer.erruption, self)
 	end
-end
-
-------------------------------
---      Test        	    --
-------------------------------
-
-function module:Test()
-	-- /run local m=BigWigs:GetModule("Heigan the Unclean");m:Test()
-
-	local function fever()
-		module:CheckForDisease(L["dtrigger"])
-	end
-	local function toPlatform()
-		module:Teleport(L["toPlatform_trigger"])
-	end
-	local function toFloor()
-		module:Teleport(L["toFloor_trigger"])
-	end
-
-	local function deactivate()
-		BigWigs:Print("deactivate")
-		self:Disable()
-	end
-
-
-
-	local time = 0
-
-	-- immitate CheckForEngage
-	self:SendEngageSync()
-
-	BigWigs:Print("module Test started")
-
-	-- fever after 9s
-	time = time + timer.firstDisease
-	BigWigs:Print(" fever after " .. time)
-	self:ScheduleEvent(self:ToString().."Test_fever", fever, time, self)
-
-	-- fever after 30s
-	time = time + timer.disease[1]
-	BigWigs:Print(" fever after " .. time)
-	self:ScheduleEvent(self:ToString().."Test_fever2", fever, time, self)
-
-	-- fever after 51s
-	time = time + timer.disease[1]
-	BigWigs:Print(" fever after " .. time)
-	self:ScheduleEvent(self:ToString().."Test_fever3", fever, time, self)
-
-	-- fever after 72s
-	time = time + timer.disease[1]
-	BigWigs:Print(" fever after " .. time)
-	self:ScheduleEvent(self:ToString().."Test_fever4", fever, time, self)
-
-
-	-- toPlatform after 90s
-	time = timer.toPlatform
-	BigWigs:Print(" to platform after " .. time)
-	self:ScheduleEvent(self:ToString().."Test_toPlatform", toPlatform, time, self)
-
-	-- toFloor after 135s
-	time = time + timer.toFloor
-	BigWigs:Print(" to floor after " .. time)
-	self:ScheduleEvent(self:ToString().."Test_toFloor", toFloor, time, self)
-
-
-	-- reset after 50s
-	time = time + 10
-	BigWigs:Print(" deactivate after " .. time)
-	self:ScheduleEvent(self:ToString().."Test_deactivate", deactivate, time, self)
 end

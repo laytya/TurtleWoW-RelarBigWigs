@@ -365,7 +365,7 @@ function module:Inferno()
 			firstinferno = false
 		else
 			self:Message(L["inferno_message"], "Important")
-			self:Bar(L["inferno_channel"], timer.inferno, icon.inferno)
+			self:Bar(L["inferno_channel"], timer.inferno, icon.inferno, true, "cyan")
 			self:DelayedIntervalBar(timer.inferno, L["inferno_bar"], timer.earliestNextInferno - timer.inferno, timer.latestNextInferno - timer.inferno, icon.inferno, true, "blue")
 		end
 

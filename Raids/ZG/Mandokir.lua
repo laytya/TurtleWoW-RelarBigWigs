@@ -299,7 +299,7 @@ function module:CHAT_MSG_MONSTER_YELL(msg)
 	if watchedplayer then
 		if self.db.profile.announce then
 			if watchedplayer == UnitName("player") then
-				self:Message(L["watched_warning"], "Personal", true, "Alarm")
+				self:Message(L["watched_warning"], "Personal", true, "Alarm", nil, "Beware")
 			else
 				self:Message(string.format(L["watched_warning_other"], watchedplayer), "Attention")
 				self:TriggerEvent("BigWigs_SendTell", watchedplayer, L["watched_warning_tell"])

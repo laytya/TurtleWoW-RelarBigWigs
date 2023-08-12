@@ -382,7 +382,7 @@ end
 function module:OnEngage()
 	self:Bar(L["Mob_Spawn"], timer.mobspawn, icon.mobspawn)
 
-	self:TriggerEvent("BigWigs_StartCounterBar", self, L["Drakonids dead"], nefCounterMax, "Interface\\Icons\\inv_egg_01")
+	self:TriggerEvent("BigWigs_StartCounterBar", self, L["Drakonids dead"], nefCounterMax, "Interface\\Icons\\inv_egg_01", true, "Cyan")
 	self:TriggerEvent("BigWigs_SetCounterBar", self, L["Drakonids dead"], (nefCounterMax - 0.1))
 end
 
@@ -555,6 +555,6 @@ function module:NefCounter(n)
 		--[[if self.db.profile.adds then
 		self:Message(string.format(L["add_message"], nefCounter), "Positive")
 		end]]
-		self:TriggerEvent("BigWigs_SetCounterBar", self, L["Drakonids dead"], (nefCounterMax - nefCounter))
+		self:TriggerEvent("BigWigs_SetCounterBar", self, L["Drakonids dead"], (nefCounterMax - nefCounter), true, "cyan")
 	end
 end

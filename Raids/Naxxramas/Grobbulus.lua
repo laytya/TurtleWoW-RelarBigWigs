@@ -1,14 +1,9 @@
 
-----------------------------------
---      Module Declaration      --
-----------------------------------
-
 local module, L = BigWigs:ModuleDeclaration("Grobbulus", "Naxxramas")
 
-
-----------------------------
---      Localization      --
-----------------------------
+module.revision = 20003
+module.enabletrigger = module.translatedName
+module.toggleoptions = {"youinjected", "otherinjected", "slimespray",  "icon", "cloud", -1, "enrage", "bosskill"}
 
 L:RegisterTranslations("enUS", function() return {
 	cmd = "Grobbulus",
@@ -32,7 +27,11 @@ L:RegisterTranslations("enUS", function() return {
 	cloud_cmd = "cloud",
 	cloud_name = "Poison Cloud",
 	cloud_desc = "Warn for Poison Clouds",
-
+	
+	slimespray_cmd = "slimespray",
+	slimespray_name = "Slime Spray",
+	slimespray_desc = "Show timer for Slime Spray",
+	
 	inject_trigger = "^([^%s]+) ([^%s]+) afflicted by Mutating Injection",
 	inject_fade = "Mutating Injection fades from you",
 
@@ -41,11 +40,9 @@ L:RegisterTranslations("enUS", function() return {
 
 	startwarn = "Grobbulus engaged, 12min to enrage!",
 	enragebar = "Enrage",
-	enrage10min = "Enrage in 10min",
-	enrage5min = "Enrage in 5min",
 	enrage1min = "Enrage in 1min",
-	enrage30sec = "Enrage in 30sec",
 	enrage10sec = "Enrage in 10sec",
+	
 	bomb_message_you = "You are injected!",
 	bomb_message_other = "%s is injected!",
 	bomb_bar = "%s injected",
@@ -54,13 +51,8 @@ L:RegisterTranslations("enUS", function() return {
 	cloud_warn = "Poison Cloud next in ~15 seconds!",
 	cloud_bar = "Poison Cloud",
 
-	slimespray_cmd = "slimespray",
-	slimespray_name = "Slime Spray",
-	slimespray_desc = "Show timer for Slime Spray",
-
 	slimeSpray_bar = "Possible Slime Spray",
 	slimeSpray_trigger = "Slime Spray",
-
 } end )
 
 L:RegisterTranslations("esES", function() return {
@@ -107,22 +99,7 @@ L:RegisterTranslations("esES", function() return {
 	cloud_bar = "Nube de veneno",
 
 } end )
----------------------------------
---      	Variables 		   --
----------------------------------
 
--- module variables
-module.revision = 20003 -- To be overridden by the module!
-module.enabletrigger = module.translatedName -- string or table {boss, add1, add2}
---module.wipemobs = { L["add_name"] } -- adds which will be considered in CheckForEngage
-module.toggleoptions = {"youinjected", "otherinjected", "slimespray",  "icon", "cloud", -1, "enrage", "bosskill"}
-
--- Proximity Plugin
--- module.proximityCheck = function(unit) return CheckInteractDistance(unit, 2) end
--- module.proximitySilent = false
-
-
--- locals
 local timer = {
 	enrage = 720,
 	inject = 10,
@@ -144,12 +121,6 @@ local syncName = {
 
 local berserkannounced = nil
 
-
-------------------------------
---      Initialization      --
-------------------------------
-
--- called after module is enabled
 function module:OnEnable()
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE", "InjectEvent")
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE", "InjectEvent")
@@ -166,35 +137,24 @@ function module:OnEnable()
 	self:ThrottleSync(10, syncName.slimeSpray)
 end
 
--- called after module is enabled and after each wipe
 function module:OnSetup()
 	self.started = nil
 end
 
--- called after boss is engaged
 function module:OnEngage()
 	if self.db.profile.enrage then
 		self:Message(L["startwarn"], "Attention")
-		self:Bar(L["enragebar"], timer.enrage, icon.enrage)
-		self:DelayedMessage(timer.enrage - 10 * 60, L["enrage10min"], "Attention")
-		self:DelayedMessage(timer.enrage - 5 * 60, L["enrage5min"], "Urgent")
+		self:Bar(L["enragebar"], timer.enrage, icon.enrage, true, "White")
 		self:DelayedMessage(timer.enrage - 1 * 50, L["enrage1min"], "Important")
-		self:DelayedMessage(timer.enrage - 30, L["enrage30sec"], "Important")
 		self:DelayedMessage(timer.enrage - 10, L["enrage10sec"], "Important")
 	end
 	if self.db.profile.slimespray then
-		self:IntervalBar(L["slimeSpray_bar"], timer.firstSlimeSpray[1], timer.firstSlimeSpray[2], icon.slimeSpray)
+		self:IntervalBar(L["slimeSpray_bar"], timer.firstSlimeSpray[1], timer.firstSlimeSpray[2], icon.slimeSpray, true, "Green")
 	end
 end
 
--- called after boss is disengaged (wipe(retreat) or victory)
 function module:OnDisengage()
 end
-
-
-------------------------------
---      Event Handlers      --
-------------------------------
 
 function module:CHAT_MSG_SPELL_CREATURE_VS_CREATURE_BUFF( msg )
 	if string.find( msg, L["cloud_trigger"] ) then
@@ -218,11 +178,6 @@ function module:CheckSpray( msg )
 	end
 end
 
-
-------------------------------
---      Synchronization	    --
-------------------------------
-
 function module:BigWigs_RecvSync( sync, rest, nick )
 	if sync == syncName.inject and rest then
 		self:Inject(rest)
@@ -231,14 +186,11 @@ function module:BigWigs_RecvSync( sync, rest, nick )
 	elseif sync == syncName.slimeSpray then
 		if self.db.profile.slimespray then
 			self:RemoveBar(L["slimeSpray_bar"])
-			self:IntervalBar(L["slimeSpray_bar"], timer.slimeSpray[1], timer.slimeSpray[2], icon.slimeSpray)
+			self:IntervalBar(L["slimeSpray_bar"], timer.slimeSpray[1], timer.slimeSpray[2], icon.slimeSpray, true, "Green")
 		end
 	end
 end
 
-------------------------------
---      Sync Handlers	    --
-------------------------------
 function module:CHAT_MSG_SPELL_AURA_GONE_SELF(msg)
 	if string.find(msg, L["inject_fade"]) then
 		self:RemoveWarningSign(icon.inject)
@@ -246,17 +198,17 @@ function module:CHAT_MSG_SPELL_AURA_GONE_SELF(msg)
 end
 
 function module:Inject(player)
-	if player then
-		if self.db.profile.youinjected and player == UnitName("player") then
-			self:Message(L["bomb_message_you"], "Personal", true, "Beware")
-			self:WarningSign(icon.inject, timer.inject)
-
-			self:Message(string.format(L["bomb_message_other"], player), "Attention", nil, nil, true)
-			self:Bar(string.format(L["bomb_bar"], player), timer.inject, icon.inject)
-		elseif self.db.profile.otherinjected then
-			self:Message(string.format(L["bomb_message_other"], player), "Attention")
-			--self:TriggerEvent("BigWigs_SendTell", player, L["bomb_message_you"]) -- can cause whisper bug on nefarian
-			self:Bar(string.format(L["bomb_bar"], player), timer.inject, icon.inject)
+	if player and player == UnitName("player") and self.db.profile.youinjected then
+		self:Message(L["bomb_message_you"], "Personal", true, "Beware")
+		self:WarningSign(icon.inject, 0.7)
+		SendChatMessage("Inject on "..UnitName("player").."!","SAY")
+		self:Message(string.format(L["bomb_message_other"], player), "Attention", nil, nil, true)
+		self:Bar(string.format(L["bomb_bar"], player), timer.inject, icon.inject, true, "Red")
+	elseif player and player ~= UnitName("player") and self.db.profile.otherinjected then
+		self:Message(string.format(L["bomb_message_other"], player), "Attention")
+		self:Bar(string.format(L["bomb_bar"], player), timer.inject, icon.inject, true, "Red")
+		if (IsRaidLeader() or IsRaidOfficer()) then
+			SendChatMessage("Inject on you!","WHISPER",nil,player)
 		end
 		if self.db.profile.icon then
 			self:Icon(player)
@@ -267,6 +219,6 @@ end
 function module:Cloud()
 	if self.db.profile.cloud then
 		self:Message(L["cloud_warn"], "Urgent")
-		self:Bar(L["cloud_bar"], timer.cloud, icon.cloud)
+		self:Bar(L["cloud_bar"], timer.cloud, icon.cloud, true, "Blue")
 	end
 end

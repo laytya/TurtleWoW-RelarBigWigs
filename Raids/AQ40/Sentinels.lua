@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Anubisath Sentinel", "Ahn'Qiraj")
 
-module.revision = 20047
+module.revision = 30009
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"abilities"}
 module.trashMod = true
@@ -22,10 +22,12 @@ L:RegisterTranslations("enUS", function() return {
     mortalstrikewarn = " has Mortal Strike!",
     shadowstormwarn = " has Shadow Storm!",
     mendwarn = " has Mending!",
-    sharefwarn = " has Shadow and Frost!",
+    sharefwarn = "?? has Shadow and Frost!",
 	arcrefwarn = " has Fire and Arcane!",
 	
-	arcreftrigger = "Detect Magic is reflected",
+	arcreftrigger = "Detect Magic is reflected",--OTHERPLAYER's Detect Magic is reflected back by Anubisath Guardian. CHAT_MSG_SPELL_FRIENDLYPLAYER_DAMAGE",
+	
+	shareftrigger = "Anubisath Guardian is afflicted by Detect Magic.",--CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE
 	
 	manaburnbufficon = "Interface\\Icons\\Spell_Shadow_ManaBurn",
 	thunderclapbufficon = "Interface\\Icons\\Ability_ThunderClap",
@@ -33,8 +35,8 @@ L:RegisterTranslations("enUS", function() return {
 	knockbackbufficon = "Interface\\Icons\\Ability_UpgradeMoonGlaive",
 	mortalstrikebufficon = "Interface\\Icons\\Ability_Warrior_SavageBlow",
 	shadowstormbufficon = "Interface\\Icons\\Spell_Shadow_Haunting",
-	arcrefbufficon = "nil",
-	sharefbufficon = "Interface\\Icons\\Spell_Arcane_Blink",
+	--arcrefbufficon = "nil",
+	--sharefbufficon = "Interface\\Icons\\Spell_Arcane_Blink",
 	mendbufficon = "Interface\\Icons\\Spell_Nature_ResistNature",
 	
 	["You have slain %s!"] = true,
@@ -118,6 +120,7 @@ function module:OnEnable()
 	self:RegisterEvent("CHAT_MSG_SPELL_SELF_DAMAGE", "Abilities")
 	self:RegisterEvent("CHAT_MSG_SPELL_PARTY_DAMAGE", "Abilities")
 	self:RegisterEvent("CHAT_MSG_SPELL_FRIENDLYPLAYER_DAMAGE", "Abilities")
+	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE", "Abilities")--sharef
 end
 
 function module:OnSetup()
@@ -186,7 +189,7 @@ function module:BigWigs_RecvSync(sync, rest, nick)
 		
 	elseif sync == syncName.sharef then
 		if firstsharef == true then
-			self:IntervalBar(string.format(rest .. L["sharefwarn"]), timer.sharef, timer.sharef, icon.sharef, true, color.sharef)
+			self:IntervalBar(string.format(L["sharefwarn"]), timer.sharef, timer.sharef, icon.sharef, true, color.sharef)
 			firstsharef = false
 		end
 		
@@ -385,22 +388,12 @@ function module:Abilities(msg)
 
 	-- Shadow Reflect
 	if firstsharef == true then
-		if UnitBuff("target",1) == L["sharefbufficon"] then
-			if GetRaidTargetIndex("target")~= nil then 
-				if GetRaidTargetIndex("target")==1 then shareficon = "Star"; end
-				if GetRaidTargetIndex("target")==2 then shareficon = "Circle"; end
-				if GetRaidTargetIndex("target")==3 then shareficon = "Diamond"; end
-				if GetRaidTargetIndex("target")==4 then shareficon = "Triangle"; end
-				if GetRaidTargetIndex("target")==5 then shareficon = "Moon"; end
-				if GetRaidTargetIndex("target")==6 then shareficon = "Square"; end
-				if GetRaidTargetIndex("target")==7 then shareficon = "Cross"; end
-				if GetRaidTargetIndex("target")==8 then shareficon = "Skull"; end
-				self:Sync(syncName.sharef .. " "..shareficon)
-				self:IntervalBar(string.format(shareficon .. L["sharefwarn"]), timer.sharef, timer.sharef, icon.sharef, true, color.sharef)
-				firstsharef = false
-			else
-				SetRaidTarget("target", sharefraidicon)
-			end			
+		if string.find(msg, L["shareftrigger"]) then
+			self:Sync(syncName.sharef)
+			self:IntervalBar(string.format(L["sharefwarn"]), timer.sharef, timer.sharef, icon.sharef, true, color.sharef)
+			firstsharef = false
+		else
+			SetRaidTarget("target", sharefraidicon)
 		end
 	end
 	
@@ -424,4 +417,5 @@ function module:Abilities(msg)
 			end			
 		end
 	end
+
 end
