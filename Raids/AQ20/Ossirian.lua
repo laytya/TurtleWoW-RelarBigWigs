@@ -150,6 +150,7 @@ function module:Event(msg)
 	end
 	
 	if ((bwOssiWeaknessTime + 46) < GetTime()) and bwOssiSupreme == false then
+		DEFAULT_MESSAGE_FRAME:AddMessage("bwOssiWeaknessTime: "..bwOssiWeaknessTime)
 		self:Bar("UNKNOWN Supreme timer", 30, icon.supreme, true, "red")
 		self:Message("WARNING! Supreme timer unknown!", "Attention", nil, "Beware")
 		bwOssiSupreme = nil
@@ -199,6 +200,7 @@ function module:Weakness(rest)
 		self:ClickIt()
 	end
 	
+	self:RemoveBar("UNKNOWN Supreme timer")
 	bwOssiWeaknessTime = GetTime()
 	bwOssiSupreme = false
 	element = tostring(rest)
@@ -253,6 +255,7 @@ end
 
 function module:Supreme()
 	self:Message(L["supremewarn"], "Attention", nil, "Beware")
+	self:RemoveBar("UNKNOWN Supreme timer")
 end
 
 function module:Cyclone()

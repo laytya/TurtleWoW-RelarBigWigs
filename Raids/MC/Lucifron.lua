@@ -241,7 +241,7 @@ end
 function module:OnEngage()
 	if self.db.profile.curse then
 		self:DelayedMessage(timer.curse - 5, L["curse_warn_soon"], "Attention", nil, nil, true)
-		self:Bar(L["curse_bar"], timer.curse, icon.curse, "Blue")
+		self:Bar(L["curse_bar"], timer.curse, icon.curse, true, "Blue")
 	end
 	if self.db.profile.doom then
 		self:DelayedMessage(timer.firstDoom - 5, L["doom_warn_soon"], "Attention", nil, nil, true)

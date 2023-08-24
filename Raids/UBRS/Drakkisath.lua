@@ -8,6 +8,7 @@ module.toggleoptions = {"adds", "bosskill", "bigicon", "icon", -1, "conflagSelf"
 /script SendAddonMessage("BigWigs","DrakkisathAddDead", "RAID", "Relar");
 /script SendAddonMessage("BigWigs","MagmadarPanic"..20041, "RAID", "Relar");
 /script SendAddonMessage("BigWigs","DrakkisathConflagged"..20059 .."_ Relar", "RAID", "Relar"); works with rest method
+/script SendAddonMessage("BigWigs","FaerlinaDispel"..30010 .." Relar", "RAID", "Relar");
 /script SendAddonMessage("BigWigs","DrakkisathConflagged"..20059 .."_Relar", "RAID", "Relar"); works with substring method
 --]]
 

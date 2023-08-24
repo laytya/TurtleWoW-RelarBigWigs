@@ -348,7 +348,7 @@ function module:CHAT_MSG_MONSTER_YELL( msg )
 	elseif msg == L["adddeath"] or msg == L["adddeath2"] then
 		theyAreDead = theyAreDead + 1
 		if theyAreDead == 2 then
-			self:Sync(syncName.addsdead)
+			self:Sync(syncName.addsDead)
 		end
 	
 	elseif string.find(msg, L["phase2_trigger1"]) or string.find(msg, L["phase2_trigger2"]) or string.find(msg, L["phase2_trigger3"]) then
