@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Grand Widow Faerlina", "Naxxramas")
 
-module.revision = 30010
+module.revision = 30012
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"mc", "sounds", "bigicon", "raidSilence", "poison", "silence", "enrage", "rain", "bosskill"}
 
@@ -58,7 +58,7 @@ L:RegisterTranslations("enUS", function() return {
 	mc_bar = " MC",
 	
 	trigger_worshipperDies = "Naxxramas Worshipper dies.",--CHAT_MSG_COMBAT_FRIENDLY_DEATH
-	
+
 	trigger_mcFade = "Mind Control fades from (.*).",--CHAT_MSG_SPELL_AURA_GONE_OTHER
 	--trigger_mcFade = "Naxxramas Worshipper begins to perform Widow's Embrace",--CHAT_MSG_SPELL_FRIENDLYPLAYER_BUFF
 	--trigger_mcSuccess = "Widow's Embrace fades from Naxxramas Worshipper.",--CHAT_MSG_SPELL_AURA_GONE_OTHER
@@ -71,7 +71,7 @@ L:RegisterTranslations("enUS", function() return {
 	msg_enrageGain = "Enrage!",
 	bar_enrageGain = "Boss is ENRAGED!",
 	
-	trigger_enrageFade = "Enrage fades from Grand Widow Faerlina.",--CHAT_MSG_SPELL_AURA_GONE_OTHER
+	trigger_enrageFade = "Enrage fades from Grand Widow Faerlina.",--CHAT_MSG_SPELL_AURA_GONE_OTHER // CHAT_MSG_SPELL_AURA_GONE_PARTY // CHAT_MSG_SPELL_AURA_GONE_SELF
 	msg_silencedEnrageFull = "Enrage silenced! next in 61 seconds",
 	
 	msg_enrageSoon = "Enrage in 10 seconds",
@@ -142,6 +142,7 @@ local syncName = {
 }
 
 bwWorshipperDiesTime = 0
+bwFaerlinaMcEndTime = 0
 bwFaerlinaEnragedFadedTime = 0
 bwFaerlinaIsEnraged = false
 
@@ -156,8 +157,9 @@ function module:OnEnable()
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE", "Event")--Poison, RaidSilence
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_PARTY_BUFFS", "Event")--mcGain
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_BUFFS", "Event")--mcGain
-	self:RegisterEvent("CHAT_MSG_COMBAT_FRIENDLY_DEATH", "Event")--WorshipperDies
+	
 	self:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_OTHER", "Event")--mcFade, enrageFade
+	self:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_PARTY", "Event")--mcFade, enrageFade
 	self:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_SELF", "Event")--mcFade
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS", "Event")--enrage
 	self:RegisterEvent("CHAT_MSG_SPELL_FRIENDLYPLAYER_BUFF", "Event")--dispel
@@ -174,10 +176,12 @@ end
 
 function module:OnSetup()
 	self.started = nil
+	self:RegisterEvent("CHAT_MSG_COMBAT_FRIENDLY_DEATH")--WorshipperDies
 end
 
 function module:OnEngage()
 	bwWorshipperDiesTime = 0
+	bwFaerlinaMcEndTime = 0
 	bwFaerlinaEnragedFadedTime = GetTime()
 	bwFaerlinaIsEnraged = false
 	
@@ -197,36 +201,37 @@ end
 function module:OnDisengage()
 end
 
+function module:CHAT_MSG_COMBAT_FRIENDLY_DEATH(msg)
+	BigWigs:CheckForBossDeath(msg, self) -- don't forget this, we are overriding the default functionality
 
-
-function module:Event(msg)
-	if (msg == L["trigger_rain2"] or string.find(msg, L["trigger_rain"])) and self.db.profile.rain then
-		self:WarningSign(icon.rain, 0.7)
-	end
-	if string.find(msg, L["trigger_poison"]) then
-		self:Sync(syncName.poison)
-	end
-	if string.find(msg, L["trigger_raidSilence"]) then
-		self:Sync(syncName.raidSilence)
-	end
-	if string.find(msg, L["trigger_mcGain"]) then
-		local _,_, mcGainPriest, _ = string.find(msg, L["trigger_mcGain"])
-		self:Sync(syncName.mc.." "..mcGainPriest)
-	end
 	if msg == L["trigger_worshipperDies"] then
 		self:Sync(syncName.worshipperDies)
 	end
-	if string.find(msg, L["trigger_mcFade"]) then
+end
+
+function module:Event(msg)
+	if (msg == L["trigger_rain2"] or string.find(msg, L["trigger_rain"])) and self.db.profile.rain then
+		self:Sound("Info")
+		self:WarningSign(icon.rain, 0.7)
+	
+	elseif string.find(msg, L["trigger_poison"]) then
+		self:Sync(syncName.poison)
+	elseif string.find(msg, L["trigger_raidSilence"]) then
+		self:Sync(syncName.raidSilence)
+	
+	elseif string.find(msg, L["trigger_mcGain"]) then
+		local _,_, mcGainPriest, _ = string.find(msg, L["trigger_mcGain"])
+		self:Sync(syncName.mc.." "..mcGainPriest)
+	elseif string.find(msg, L["trigger_mcFade"]) then
 		local _,_, mcEndPriest, _ = string.find(msg, L["trigger_mcFade"])
 		self:Sync(syncName.mcEnd.." "..mcEndPriest)
-	end
-	if string.find(msg, L["trigger_enrage"]) then
+	
+	elseif string.find(msg, L["trigger_enrage"]) then
 		self:Sync(syncName.enrage)
-	end
-	if msg == L["trigger_enrageFade"] then
+	elseif msg == L["trigger_enrageFade"] then
 		self:Sync(syncName.enrageFade)
-	end
-	if string.find(msg, L["trigger_dispel"]) then
+	
+	elseif string.find(msg, L["trigger_dispel"]) then
 		local _,_, dispeller, _ = string.find(msg, L["trigger_dispel"])
 		self:Sync(syncName.dispel.." "..dispeller)
 	end
@@ -273,36 +278,48 @@ end
 function module:McEnd(rest)
 	self:RemoveBar(rest..L["mc_bar"])
 	
-	--Determine if the Mc faded less than 1 second after a worshipper died, if yes, then is probably a successful silence :: no trigger
-	--GetTime() < (bwWorshipperDiesTime + 1) 
-	
-	--WAY Too Soon, LESS THAN 30sec after silence -->> time to enrage is not changed
-	if bwFaerlinaIsEnraged == false and (GetTime() < (bwFaerlinaEnragedFadedTime + 30)) and (GetTime() < (bwWorshipperDiesTime + 1)) then
-		self:RemoveBar(L["bar_enrageGain"])
-		if self.db.profile.silence then
-			self:Message(L["msg_silenceZero"], "Urgent")
-		end
+	bwFaerlinaMcEndTime = GetTime()
+	self:Embrace()
+end
 
-	
-	--Too Soon but still silences, MORE THAN 30, LESS THAN 60sec after silence -->> time to enrage is 30sec
-	elseif bwFaerlinaIsEnraged == false and (GetTime() < (bwFaerlinaEnragedFadedTime + 60)) and (GetTime() < (bwWorshipperDiesTime + 1)) then 
-		self:RemoveBar(L["bar_enrageGain"])
-		self:RemoveBar(L["bar_enrageCD"])
+function module:WorshipperDies()
+	bwWorshipperDiesTime = GetTime()
+	self:Embrace()
+end
+
+function module:Embrace()
+	--Determine if the Mc faded less than 1 second after a worshipper died, if yes, then is probably a successful silence :: no trigger
+	if ((abs(bwWorshipperDiesTime - bwFaerlinaMcEndTime)) < 1) and bwFaerlinaIsEnraged == false then
 		
-		if self.db.profile.silence then
-			self:Bar(L["bar_silence"], timer.silence, icon.silence, true, "white")
-			self:Message(L["msg_silencedHalf"], "Urgent")
-		end
 		
-		if self.db.profile.enrage then
-			self:Bar(L["bar_enrageCD"], timer.silencedWithoutEnrage, icon.enrage, true, "red")
-			self:DelayedMessage(timer.silencedWithoutEnrage - 10, L["msg_enrageSoon"], "Urgent", nil, nil)
-		end
-		if UnitClass("player") == "Priest" and self.db.profile.bigicon then
-			self:DelayedWarningSign(timer.silencedWithoutEnrage - 10, icon.mc, 0.7)
-		end
-		if UnitClass("player") == "Priest" and self.db.profile.sounds then
-			self:DelayedSound(timer.silencedWithoutEnrage - 10, "Info")
+		--WAY Too Soon, LESS THAN 30sec after silence -->> time to enrage is not changed
+		if (GetTime() < (bwFaerlinaEnragedFadedTime + 30)) then
+			self:RemoveBar(L["bar_enrageGain"])
+			if self.db.profile.silence then
+				self:Message(L["msg_silenceZero"], "Urgent")
+			end
+
+		
+		--Too Soon but still silences, MORE THAN 30, LESS THAN 60sec after silence -->> time to enrage is 30sec
+		elseif (GetTime() < (bwFaerlinaEnragedFadedTime + 60)) then 
+			self:RemoveBar(L["bar_enrageGain"])
+			self:RemoveBar(L["bar_enrageCD"])
+			
+			if self.db.profile.silence then
+				self:Bar(L["bar_silence"], timer.silence, icon.silence, true, "white")
+				self:Message(L["msg_silencedHalf"], "Urgent")
+			end
+			
+			if self.db.profile.enrage then
+				self:Bar(L["bar_enrageCD"], timer.silencedWithoutEnrage, icon.enrage, true, "red")
+				self:DelayedMessage(timer.silencedWithoutEnrage - 10, L["msg_enrageSoon"], "Urgent", nil, nil)
+			end
+			if UnitClass("player") == "Priest" and self.db.profile.bigicon then
+				self:DelayedWarningSign(timer.silencedWithoutEnrage - 10, icon.mc, 0.7)
+			end
+			if UnitClass("player") == "Priest" and self.db.profile.sounds then
+				self:DelayedSound(timer.silencedWithoutEnrage - 10, "Info")
+			end
 		end
 	end
 end
@@ -349,10 +366,6 @@ function module:EnrageFade()
 	if UnitClass("player") == "Priest" and self.db.profile.sounds then
 		self:DelayedSound(timer.silencedEnrage - 10, "Info")
 	end
-end
-
-function module:WorshipperDies()
-	bwWorshipperDiesTime = GetTime()
 end
 
 function module:Dispel(rest)

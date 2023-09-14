@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Deathknight Captain", "Naxxramas")
 
-module.revision = 20050
+module.revision = 30011
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"whirlwind"}
 module.trashMod = true
@@ -13,8 +13,8 @@ L:RegisterTranslations("enUS", function() return {
 	whirlwind_name = "Whirlwind Alert",
 	whirlwind_desc = "Warn for Whirlwind",
 	
-	whirlwind_trigger = "Deathknight Captain gains Whirlwind.",
-	whirlwindEnd_trigger = "Whirlwind fades from Deathknight Captain.",
+	whirlwind_trigger = "Deathknight Captain gains Whirlwind.",--CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS
+	whirlwindEnd_trigger = "Whirlwind fades from Deathknight Captain.",--CHAT_MSG_SPELL_AURA_GONE_OTHER
 	whirlwind_bar1 = "Whirlwind 1",
 	whirlwind_bar2 = "Whirlwind 2",
 	whirlwindCD_bar1 = "Whirlwind CD 1",
@@ -37,6 +37,9 @@ local syncName = {
 
 local deathCount = 0
 local _, playerClass = UnitClass("player")
+bwDkCapWwTime = 0
+bwDkCapWwTimeCd = 0
+
 
 function module:OnEnable()
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS", "Event")
@@ -52,6 +55,9 @@ function module:OnSetup()
 end
 
 function module:OnEngage()
+	bwDkCapWwTime = GetTime() - 8
+	bwDkCapWwTimeCd = GetTime() - 8
+	
 	wwTime = GetTime() - 8
 	wwTimeCD = GetTime() - 8
 end
@@ -86,11 +92,10 @@ function module:BigWigs_RecvSync(sync, rest, nick)
 end
 
 function module:Whirlwind()
-	if wwTime == nil then
-		wwTime = GetTime()
+	if bwDkCapWwTime == nil then
+		bwDkCapWwTime = GetTime()
 	end
-	now = GetTime()
-	if now - wwTime > 8 then
+	if (GetTime() - bwDkCapWwTime) > 8 then
 		self:Bar(L["whirlwind_bar1"], timer.whirlwind, icon.whirlwind, true, "red")
 	else
 		self:Bar(L["whirlwind_bar2"], timer.whirlwind, icon.whirlwind, true, "red")
@@ -100,18 +105,17 @@ function module:Whirlwind()
 			self:WarningSign(icon.whirlwind, 0.7)
 		end
 	end
-	wwTime = GetTime()
+	bwDkCapWwTime = GetTime()
 end
 
 function module:WhirlwindEnd()
-	nowCD = GetTime()
-	if wwTimeCD == nil then
-		wwTimeCD = GetTime()
+	if bwDkCapWwTimeCd == nil then
+		bwDkCapWwTimeCd = GetTime()
 	end
-	if nowCD - wwTimeCD > 8 then
+	if (GetTime() - bwDkCapWwTimeCd) > 8 then
 		self:Bar(L["whirlwindCD_bar1"], timer.whirlwindCD, icon.whirlwind, true, "white")
 	else
 		self:Bar(L["whirlwindCD_bar2"], timer.whirlwindCD, icon.whirlwind, true, "white")
 	end
-	wwTimeCD = GetTime()
+	bwDkCapWwTimeCd = GetTime()
 end

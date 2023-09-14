@@ -1,14 +1,9 @@
 
-----------------------------------
---      Module Declaration      --
-----------------------------------
-
 local module, L = BigWigs:ModuleDeclaration("Bloodlord Mandokir", "Zul'Gurub")
 
-
-----------------------------
---      Localization      --
-----------------------------
+module.revision = 30012
+module.enabletrigger = module.translatedName
+module.toggleoptions = {"sounds", "bigicon", "sunder", "charge", "gaze", "announce", "puticon", "whirlwind", "enraged", "bosskill"}
 
 L:RegisterTranslations("enUS", function() return {
 	ohgan = "Ohgan",
@@ -191,18 +186,9 @@ L:RegisterTranslations("esES", function() return {
 	["Charge"] = "Embestir",
 	["Next Whirlwind"] = "Próximo Torbellino",
 } end )
----------------------------------
---      	Variables 		   --
----------------------------------
 
--- module variables
-module.revision = 20005 -- To be overridden by the module!
-module.enabletrigger = module.translatedName -- string or table {boss, add1, add2}
-module.wipemobs = { L["ohgan"] } -- adds which will be considered in CheckForEngage
-module.toggleoptions = {"sounds", "bigicon", "sunder", "charge", "gaze", "announce", "puticon", "whirlwind", "enraged", "bosskill"}
+module.wipemobs = { L["ohgan"] }
 
-
--- locals
 local timer = {
 	firstCharge = 15,
 	charge = 34,
@@ -227,28 +213,8 @@ local syncName = {
 	charge = "MandokirCharge"..module.revision,
 }
 
---[[
-9/16 22:28:16.440  Dorg's Shield Slam hits Bloodlord Mandokir for 264. -- engage
-
-Line 19212: 9/16 22:28:32.884  Bloodlord Mandokir gains Whirlwind.	16.4
-Line 20100: 9/16 22:28:56.912  Bloodlord Mandokir gains Whirlwind.	24.1
-Line 21416: 9/16 22:29:38.798  Bloodlord Mandokir gains Whirlwind.	41.9
-Line 22221: 9/16 22:30:02.966  Bloodlord Mandokir gains Whirlwind.	24.1
-
-Line 19709: 9/16 22:28:45.869  Bloodlord Mandokir begins to cast Threatening Gaze. 	29.5
-Line 20694: 9/16 22:29:13.993  Bloodlord Mandokir begins to cast Threatening Gaze.	28.1
-Line 21512: 9/16 22:29:42.084  Bloodlord Mandokir begins to cast Threatening Gaze.	28.1
-Line 22455: 9/16 22:30:10.189  Bloodlord Mandokir begins to cast Threatening Gaze.	28.1
-]]
-
-
-------------------------------
---      Initialization      --
-------------------------------
-
 module:RegisterYellEngage(L["engage_trigger"])
 
--- called after module is enabled
 function module:OnEnable()
 	self:RegisterEvent("CHAT_MSG_MONSTER_YELL")
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS", "Event")
@@ -272,11 +238,9 @@ function module:OnEnable()
 	self:ThrottleSync(5, syncName.charge)
 end
 
--- called after module is enabled and after each wipe
 function module:OnSetup()
 end
 
--- called after boss is engaged
 function module:OnEngage()
 	self:Bar(L["chargecd_bar"], timer.firstCharge, icon.charge, true, "yellow")
 	-- todo check combat log regarding CHARGE to trigger the ones following the first
@@ -284,14 +248,8 @@ function module:OnEngage()
 	self:Bar(L["Possible Gaze"], timer.firstGaze, icon.gaze, true, "red")
 end
 
--- called after boss is disengaged (wipe(retreat) or victory)
 function module:OnDisengage()
 end
-
-
-------------------------------
---      Event Handlers	    --
-------------------------------
 
 function module:CHAT_MSG_MONSTER_YELL(msg)
 	local gazetime
@@ -362,9 +320,6 @@ function module:Sunder()
 		self:Sound("stacks")
 	end
 end
-------------------------------
---      Synchronization	    --
-------------------------------
 
 function module:BigWigs_RecvSync(sync, rest, nick)
 	if sync == syncName.whirlwind and self.db.profile.whirlwind then

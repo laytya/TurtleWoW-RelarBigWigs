@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Maexxna", "Naxxramas")
 
-module.revision = 30010
+module.revision = 30012
 module.enabletrigger = module.translatedName
 module.toggleoptions = { "cocoon", "webspray", "poison", "enrage", "spiderlings", "bosskill" }
 
@@ -100,7 +100,7 @@ L:RegisterTranslations("esES", function() return {
 local timer = {
 	cocoonDuration = 600,
     cocoonCD = 20,
-	websprayDuration = 8,
+	websprayDuration = 10,
 	websprayCD = 40,
 	poisonDuration = 30,
     firstPoison = 15,--14.89
@@ -136,8 +136,8 @@ function module:OnEnable()
 	self:ThrottleSync(0, syncName.cocoonFade)
     self:ThrottleSync(8, syncName.webspray)
 	self:ThrottleSync(8, syncName.websprayFade)
-    self:ThrottleSync(5, syncName.poison)
-	self:ThrottleSync(5, syncName.poisonFade)
+    self:ThrottleSync(2, syncName.poison)
+	self:ThrottleSync(2, syncName.poisonFade)
 	self:ThrottleSync(10, syncName.enrage)
 end
 
@@ -150,7 +150,7 @@ function module:OnEngage()
 		self:Bar(L["bar_poisonCD"], timer.firstPoison, icon.poison, true, "Green")
 	end
 	if self.db.profile.cocoon then
-		self:Bar(L["bar_cocoonCD"], timer.cocoonCD, icon.cocoonCD, true, "blue")
+		self:Bar(L["bar_cocoonCD"], timer.cocoonCD, icon.cocoon, true, "blue")--probably fixed
 	end
 	if self.db.profile.spiderlings then
 		self:Bar(L["bar_spiderlings"], timer.spiderlings, icon.spiderlings, true, "red")
@@ -243,6 +243,7 @@ function module:WebsprayFade()
 end
 
 function module:Poison()
+	self:RemoveBar(L["bar_poisonCD"])
 	self:Bar(L["bar_poisonGain"], timer.poisonDuration, icon.poison, true, "Green")
 	if UnitClass("Player") == "Shaman" or UnitClass("Player") == "Paladin" or UnitClass("Player") == "Druid" then
 		self:WarningSign(icon.poison, 0.7)
@@ -254,6 +255,6 @@ function module:PoisonFade()
 end
 
 function module:Enrage()
-    self:Message(L["msg_enrageGain"], "Important")
+	self:Message(L["msg_enrageGain"], "Important", nil, "Beware")
 	self:WarningSign(icon.enrage, 0.7)
 end

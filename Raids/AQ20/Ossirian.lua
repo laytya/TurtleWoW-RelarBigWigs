@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Ossirian the Unscarred", "Ruins of Ahn'Qiraj")
 
-module.revision = 30009
+module.revision = 30012
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"bigicon", "warstomp", "cyclone", "sandstorm", "supreme", "weakness", "clickit", "bosskill"}
 
@@ -37,6 +37,7 @@ L:RegisterTranslations("enUS", function() return {
 	clickit_desc = "Timers for if you click after this timer, he will go supreme",
 
 	supreme_trigger = "Ossirian the Unscarred gains Strength of Ossirian.",
+	supreme_trigger2 = "Ossirian the Unscarred is afflicted by Strength of Ossirian.",
 	supreme_bar = "Supreme",
 	supremewarn = "Ossirian Supreme Mode!",
 	supremedelaywarn = "Supreme in %d seconds!",
@@ -45,8 +46,6 @@ L:RegisterTranslations("enUS", function() return {
 	debuff_trigger2 = "Ossirian the Unscarred gains (.+) Weakness.",
 	debuffwarn = "Ossirian now weak to ",
 
-	ossiGainsSupreme = "Ossirian the Unscarred gains Strength of Ossirian.",
-	ossiGainsSupreme2 = "Ossirian the Unscarred is afflicted Strength of Ossirian.",
 	ossiLostSupreme = "Strength of Ossirian fades from Ossirian the Unscarred.",-- CHAT_MSG_SPELL_AURA_GONE_OTHER",
 
 	expose = "Expose",
@@ -70,7 +69,7 @@ local timer = {
 	warstomp = 30,
 	cyclone = 20,
 	clickit = 10,
-	firstcrystal = 9,
+	firstcrystal = 8,
 	firstWarstomp = 25,
 }
 
@@ -145,12 +144,8 @@ function module:Event(msg)
 	if msg == L["ossiLostSupreme"] then
 		bwOssiSupreme = false
 	end
-	if msg == L["ossiGainsSupreme"] or msg == L["ossiGainsSupreme2"] then
-		bwOssiSupreme = true
-	end
 	
 	if ((bwOssiWeaknessTime + 46) < GetTime()) and bwOssiSupreme == false then
-		DEFAULT_MESSAGE_FRAME:AddMessage("bwOssiWeaknessTime: "..bwOssiWeaknessTime)
 		self:Bar("UNKNOWN Supreme timer", 30, icon.supreme, true, "red")
 		self:Message("WARNING! Supreme timer unknown!", "Attention", nil, "Beware")
 		bwOssiSupreme = nil
@@ -172,7 +167,7 @@ function module:Event(msg)
 	if string.find(msg, L["warstomp_trigger"]) then
 		self:Sync(syncName.warstomp)
 	end
-	if string.find(msg, L["supreme_trigger"]) then
+	if string.find(msg, L["supreme_trigger"]) or string.find(msg, L["supreme_trigger2"]) then
 		self:Sync(syncName.supreme)
 	end
 	if string.find(msg, L["sandstorm_trigger"]) and self.db.profile.sandstorm then
@@ -254,6 +249,7 @@ function module:Weakness(rest)
 end
 
 function module:Supreme()
+	bwOssiSupreme = true
 	self:Message(L["supremewarn"], "Attention", nil, "Beware")
 	self:RemoveBar("UNKNOWN Supreme timer")
 end

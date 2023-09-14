@@ -1,9 +1,9 @@
 
 local module, L = BigWigs:ModuleDeclaration("Living Monstrosity", "Naxxramas")
 
-module.revision = 20048
+module.revision = 30011
 module.enabletrigger = module.translatedName
-module.toggleoptions = { "lightningtotem" }
+module.toggleoptions = {"lightningtotem", "autotarget"}
 module.trashMod = true
 
 L:RegisterTranslations("enUS", function() return {
@@ -13,14 +13,18 @@ L:RegisterTranslations("enUS", function() return {
 	lightningtotem_name = "Lightning Totem Alert",
 	lightningtotem_desc = "Warn for Lightning Totem summon",
 	
-	lightningtotem_trigger = "Living Monstrosity begins to cast Lightning Totem",
-	lightningtotem_trigger2 = "Living Monstrosity casts Lightning Totem.",
-	lightningtotem_bar = "SUMMON LIGHTNING TOTEM",
-	lightningtotem_message = "LIGHTNING TOTEM INC",
+	autotarget_cmd = "autotarget",
+	autotarget_name = "Auto-Target Lightning Totem",
+	autotarget_desc = "Targets the totem automatically upon summon",
+	
+	trigger_totemUp = "Living Monstrosity casts Lightning Totem.",--CHAT_MSG_SPELL_CREATURE_VS_CREATURE_BUFF
+	msg_totemUp = "Lightning Totem!",
+	
+	trigger_totemDead = "Lightning Totem dies.",--CHAT_MSG_COMBAT_HOSTILE_DEATH
+	msg_totemDead = "Totem is dead =)",
 } end )
 
 local timer = {
-	lightningTotem = {0.5, 2}
 }
 
 local icon = {
@@ -31,12 +35,11 @@ local syncName = {
 }
 
 function module:OnEnable()
-	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_CREATURE_DAMAGE")
-	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_CREATURE_BUFF")
+	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_CREATURE_BUFF", "Event")--totem up
+	self:RegisterEvent("CHAT_MSG_COMBAT_HOSTILE_DEATH", "Event")--totem dead
 end
 
 function module:OnSetup()
-	self:RegisterEvent("CHAT_MSG_COMBAT_HOSTILE_DEATH")
 end
 
 function module:OnEngage()
@@ -45,23 +48,38 @@ end
 function module:OnDisengage()
 end
 
-function module:CHAT_MSG_SPELL_CREATURE_VS_CREATURE_DAMAGE(msg)
-	if string.find(msg, L["lightningtotem_trigger"]) and self.db.profile.lightningtotem then
-		self:Message(L["lightningtotem_message"], "Urgent")
-		self:IntervalBar(L["lightningtotem_bar"], timer.lightningTotem[1], timer.lightningTotem[2], icon.lightningTotem, true, "blue")
-	end
-end
-
-function module:CHAT_MSG_SPELL_CREATURE_VS_CREATURE_BUFF(msg)
-	if string.find(msg, L["lightningtotem_trigger2"]) and self.db.profile.lightningtotem then
-		self:Message(L["lightningtotem_message"], "Urgent")
-		self:WarningSign(icon.lightningTotem, 1)
-	end
-end
-
-function module:CHAT_MSG_COMBAT_HOSTILE_DEATH(msg)
-	BigWigs:CheckForBossDeath(msg, self)
-	if (msg == string.format(UNITDIESOTHER, "Lightning Totem")) then
-		self:RemoveWarningSign(icon.lightningTotem)
+function module:Event(msg)
+	if msg == L["trigger_totemUp"] then
+		if self.db.profile.lightningtotem then
+			self:Message(L["msg_totemUp"], "Urgent")
+			self:WarningSign(icon.lightningTotem, 0.7)
+		end
+		if self.db.profile.autotarget then
+			if UnitClass("Player") == "Rogue" then
+				TargetByName("Lightning Totem",true)
+				--DEFAULT_CHAT_FRAME:AddMessage("Rogue")
+			end
+			--if UnitClass("Player") == "Paladin" then
+			--	DEFAULT_CHAT_FRAME:AddMessage("Paladin")
+			--end
+			if UnitClass("Player") == "Hunter" then
+				TargetByName("Lightning Totem",true)
+				--DEFAULT_CHAT_FRAME:AddMessage("Hunter")
+			end
+			if UnitClass("Player") == "Warrior" then
+				TargetByName("Lightning Totem",true)
+				--DEFAULT_CHAT_FRAME:AddMessage("Warrior")
+			end
+			if UnitClass("Player") == "Mage" then
+				TargetByName("Lightning Totem",true)
+				--DEFAULT_CHAT_FRAME:AddMessage("Mage")
+			end
+			if UnitClass("Player") == "Warlock" then
+				TargetByName("Lightning Totem",true)
+				--DEFAULT_CHAT_FRAME:AddMessage("Warlock")
+			end
+		end
+	elseif msg == L["trigger_totemDead"] and self.db.profile.lightningtotem then
+		self:Message(L["msg_totemDead"], "Urgent")
 	end
 end

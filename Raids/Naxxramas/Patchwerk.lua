@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Patchwerk", "Naxxramas")
 
-module.revision = 20003
+module.revision = 30012
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"enrage", "bosskill"}
 
@@ -12,16 +12,15 @@ L:RegisterTranslations("enUS", function() return {
 	enrage_name = "Enrage Alert",
 	enrage_desc = "Warn for Enrage",
 	
-	starttrigger1 = "Patchwerk want to play!",
-	starttrigger2 = "Kel'Thuzad make Patchwerk his Avatar of War!",
-	startwarn = "Patchwerk Engaged! Enrage in 7 minutes!",
+	trigger_start1 = "Patchwerk want to play!",
+	trigger_start2 = "Kel'Thuzad make Patchwerk his Avatar of War!",
 	
-	enragebartext = "Enrage",
-	warn60 = "Enrage in 60 seconds",
-	warn10 = "Enrage in 10 seconds",
+	trigger_enrage = "%s becomes enraged!",--CHAT_MSG_MONSTER_EMOTE
 	
-	enragetrigger = "%s goes into a berserker rage!",
-	enragewarn = "Enrage!",
+	bar_enrage = "Enrage",
+	msg_enrage60 = "Enrage in 60 seconds",
+	msg_enrage10 = "Enrage in 10 seconds",
+	msg_enrage = "Enrage!",
 } end )
 
 L:RegisterTranslations("esES", function() return {
@@ -56,51 +55,48 @@ local syncName = {
 	enrage = "PatchwerkEnrage"..module.revision,
 }
 
-local berserkannounced = nil
-
-module:RegisterYellEngage(L["starttrigger1"])
-module:RegisterYellEngage(L["starttrigger2"])
+module:RegisterYellEngage(L["trigger_start1"])
+module:RegisterYellEngage(L["trigger_start2"])
 
 function module:OnEnable()
+	self:RegisterEvent("CHAT_MSG_MONSTER_EMOTE", "Event")--enrage
+	--self:RegisterEvent("CHAT_MSG_EMOTE", "Event")--test
+	
 	self:ThrottleSync(10, syncName.enrage)
 end
 
 function module:OnSetup()
 	self.started = false
-	berserkannounced = false
 end
 
 function module:OnEngage()
 	if self.db.profile.enrage then
-		self:Message(L["startwarn"], "Important")
-		self:Bar(L["enragebartext"], timer.enrage, icon.enrage, true, "White")
-		self:DelayedMessage(timer.enrage - 60, L["warn60"], "Urgent")
-		self:DelayedMessage(timer.enrage - 10, L["warn10"], "Important")
+		self:Bar(L["bar_enrage"], timer.enrage, icon.enrage, true, "White")
+		self:DelayedMessage(timer.enrage - 60, L["msg_enrage60"], "Urgent")
+		self:DelayedMessage(timer.enrage - 10, L["msg_enrage10"], "Important")
 	end
 end
 
 function module:OnDisengage()
 end
 
-function module:CHAT_MSG_MONSTER_EMOTE( msg )
-	if msg == L["enragetrigger"] then
+function module:Event(msg)
+	if msg == L["trigger_enrage"] then
 		self:Sync(syncName.enrage)
 	end
 end
 
 function module:BigWigs_RecvSync(sync, rest, nick)
-	if sync == syncName.enrage then
+	if sync == syncName.enrage and self.db.profile.enrage then
 		self:Enrage()
 	end
 end
 
 function module:Enrage()
-	if self.db.profile.enrage then
-		self:Message(L["enragewarn"], "Important", nil, "Beware")
-
-		self:RemoveBar(L["enragebartext"])
-
-		self:CancelDelayedMessage(L["warn60"])
-		self:CancelDelayedMessage(L["warn10"])
-	end
+	self:RemoveBar(L["bar_enrage"])
+	self:CancelDelayedMessage(L["msg_enrage60"])
+	self:CancelDelayedMessage(L["msg_enrage10"])
+	
+	self:Message(L["msg_enrage"], "Important", nil, "Beware")
+	self:WarningSign(icon.enrage, 0.7)
 end

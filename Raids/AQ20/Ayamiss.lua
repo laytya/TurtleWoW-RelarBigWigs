@@ -1,9 +1,9 @@
 
 local module, L = BigWigs:ModuleDeclaration("Ayamiss the Hunter", "Ruins of Ahn'Qiraj")
 
-module.revision = 20042
+module.revision = 30012
 module.enabletrigger = module.translatedName
-module.toggleoptions = {"bigicon", "sounds", "icon", "sacrifice", "bosskill"}
+module.toggleoptions = {"bigicon", "sacrifice", "bosskill"}
 
 L:RegisterTranslations("enUS", function() return {
 	cmd = "Ayamiss",
@@ -11,29 +11,19 @@ L:RegisterTranslations("enUS", function() return {
 	sacrifice_cmd = "sacrifice",
 	sacrifice_name = "Sacrifice Alert",
 	sacrifice_desc = "Warn for Sacrifice",
-
-	icon_cmd = "icon",
-	icon_name = "Place icon",
-	icon_desc = "Place raid icon on larva (requires promoted or higher)",
 	
 	bigicon_cmd = "bigicons",
 	bigicon_name = "Kill the larva icon alert",
 	bigicon_desc = "Shows a big icon when a larva spawns",
 	
-	sounds_cmd = "sounds",
-	sounds_name = "Kill the larva sound alert",
-	sounds_desc = "Sound effect when a larva spawns",
-	
 	sacrificeother_trigger = "(.*) is afflicted by Paralyze.",
 	sacrificeyou_trigger = "(.*) are afflicted by Paralyze.",
 	sacrificeend_trigger = "Paralyze fades from",
 	
-	sacrifice_bar = " Sacrificed!",
 	larva_bar = "Larva >Click Me!<",
 	nextlarva_bar = "Larva/Sacrifice CD",
 	
-	sacrificemsg_you = "You are Sacrificed!",
-	sacrificemsg_other = " is Sacrificed!",
+	msg_sacrifice = " Sacrificed, Kill the larva!",
 	
 	p2_msg = "Phase 2",
 
@@ -42,12 +32,10 @@ L:RegisterTranslations("enUS", function() return {
 
 local timer = {
 	sacrifice = 10,
-	larva = 9,
-	larvacd = 15.5,
+	larvacd = 14,
 }
 
 local icon = {
-	larva = "Ability_creature_poison_01",
 	sacrifice = "ability_creature_poison_05",
 }
 
@@ -74,11 +62,8 @@ self:RegisterEvent("CHAT_MSG_COMBAT_HOSTILE_DEATH")
 end
 
 function module:OnEngage()
-	if UnitName("target") == "Ayamiss the Hunter" and (IsRaidLeader() or IsRaidOfficer()) then
-		klhtm.net.sendmessage("target " .. "Ayamiss the Hunter")
-	end
 	local p2 = nil
-	self:Bar(L["nextlarva_bar"], timer.larvacd, icon.larva)
+	self:Bar(L["nextlarva_bar"], timer.larvacd, icon.sacrifice, true, "white")
 end
 
 function module:OnDisengage()
@@ -116,29 +101,38 @@ function module:Event(msg)
 end
 
 function module:BigWigs_RecvSync(sync, rest, nick)
-	if sync == syncName.sacrifice then
-	self:Bar(L["nextlarva_bar"], timer.larvacd, icon.larva)
-		if rest ==	UnitName("player") then
-			self:Message(L["sacrificemsg_you"], "Attention")
-			self:Bar(rest..L["sacrifice_bar"], timer.sacrifice, icon.sacrifice)
-		else
-			self:Message(rest..L["sacrificemsg_other"], "Attention")
-			self:Bar(rest..L["sacrifice_bar"], timer.sacrifice, icon.sacrifice)
-			self:Bar(L["larva_bar"], timer.larva, icon.larva)
-			self:SetCandyBarOnClick("BigWigsBar "..L["larva_bar"], function(name, button, extra) TargetByName(extra, true) end, "Hive'Zara Larva")
-			self:Message("Kill the larva!", "Urgent")
-			if self.db.profile.sounds then
-				self:Sound("Beware")
-			end
-			if self.db.profile.bigicon then
-				self:WarningSign(icon.larva, 0.7)
-			end
-		end
+	if sync == syncName.sacrifice and rest and self.db.profile.sacrifice then
+		self:Sacrifice(rest)
 	elseif sync == syncName.p2 then
-		self:Message(L["p2_msg"], "Attention")
-		p2 = true
-	elseif sync == syncName.larvaend then
-		self:RemoveBar(L["larva_bar"])
-		self:RemoveBar(L["sacrifice_bar"])
+		self:Phase2()
+	elseif sync == syncName.larvaend and self.db.profile.sacrifice then
+		self:LarvaEnd()
 	end
+end
+
+function module:Sacrifice(rest)
+	self:Message(rest..L["msg_sacrifice"], "Urgent", false, "Beware")
+	self:Bar(L["larva_bar"], timer.larva, icon.sacrifice, true, "red")
+	self:SetCandyBarOnClick("BigWigsBar "..L["larva_bar"], function(name, button, extra) TargetByName("Hive'Zara Larva", true) end, rest)
+	
+	if self.db.profile.bigicon then
+		self:WarningSign(icon.sacrifice, 0.7)
+	end
+	
+	if IsRaidLeader() or IsRaidOfficer() then
+		TargetByName("Hive'Zara Larva",true)
+		SetRaidTarget("target",8)
+		TargetLastTarget()
+	end
+	
+	self:Bar(L["nextlarva_bar"], timer.larvacd, icon.sacrifice, true, "white")
+end
+
+function module:Phase2()
+	self:Message(L["p2_msg"], "Attention")
+	p2 = true
+end
+
+function module:LarvaEnd()
+	self:RemoveBar(L["larva_bar"])
 end

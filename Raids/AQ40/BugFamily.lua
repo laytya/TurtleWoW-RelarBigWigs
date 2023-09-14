@@ -37,7 +37,8 @@ L:RegisterTranslations("enUS", function() return {
 	panicresist_trigger = "Panic was resisted",
 	panicimmune_trigger = "Panic fail(.+) immune",
 
-	toxicvaporsyou_trigger = "You are afflicted by Toxic Vapors\.",
+	--toxicvaporsyou_trigger = "You are afflicted by Toxic Vapors\.",
+	toxicvaporsyou_trigger = "You suffer (.*) Nature damage from Ruklar the Trapper's Toxic Vapors.",--CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE
 	toxicvaporsother_trigger = "(.+) is afflicted by Toxic Vapors\.",
 
 	toxicvaporsyou_trigger2 = "You suffer (%d+) (.+) from Lord Kri's Toxic Vapors.",
@@ -229,7 +230,7 @@ L:RegisterTranslations("deDE", function() return {
 ---------------------------------
 
 -- module variables
-module.revision = 20007 -- To be overridden by the module!
+module.revision = 30012 -- To be overridden by the module!
 module.enabletrigger = {kri, yauj, vem} -- string or table {boss, add1, add2}
 --module.wipemobs = { L["add_name"] } -- adds which will be considered in CheckForEngage
 module.toggleoptions = {"panic", "toxicvolley", "heal", "announce", "deathspecials", "enrage", "bosskill"}
@@ -395,7 +396,8 @@ function module:Spells(msg)
 	elseif string.find(msg, L["toxicvolleyhit_trigger"]) or string.find(msg, L["toxicvolleyafflicted_trigger"]) or string.find(msg, L["toxicvolleyresist_trigger"]) or string.find(msg, L["toxicvolleyimmune_trigger"]) then
 		self:Sync(syncName.volley)
 	elseif ( msg == L["toxicvaporsyou_trigger"] or string.find(msg, L["toxicvaporsyou_trigger2"]) ) and self.db.profile.announce then
-		self:Message(L["toxicvapors_message"], "Attention", "Alarm")
+		self:WarningSign("Spell_Nature_AbolishMagic", 0.7)
+		self:Sound("Info")
 	elseif toxicvaporsother and self.db.profile.announce then
 		self:TriggerEvent("BigWigs_SendTell", toxicvaporsother, L["toxicvapors_message"])
 	elseif toxicvaporsother2 and self.db.profile.announce then

@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Anub'Rekhan", "Naxxramas")
 
-module.revision = 30010
+module.revision = 30012
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"locust", "impale", "enrage", "bosskill"}
 
@@ -24,20 +24,22 @@ L:RegisterTranslations("enUS", function() return {
 	starttrigger2 = "Yes, run! It makes the blood pump faster!",
 	starttrigger3 = "There is no way out.",
 	
-	trigger_locustSwarmCast = "Anub'Rekhan begins to cast Locust Swarm.",
+	trigger_locustSwarmCast = "Anub'Rekhan begins to cast Locust Swarm.",--CHAT_MSG_SPELL_CREATURE_VS_CREATURE_BUFF
 	msg_locustSwarmCasting = "Incoming Locust Swarm!",
 	bar_locustSwarmCasting = "Incoming Locust Swarm!",
 	
-	trigger_locustSwarmGain = "Anub'Rekhan gains Locust Swarm.",
+	trigger_locustSwarmGain = "Anub'Rekhan is afflicted by Locust Swarm.",--CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE
+
 	bar_locustSwarmIsUp = "Locust Swarm",
 	
-	trigger_locustSwarmEnds = "Locust Swarm fades from Anub'Rekhan.",
+	trigger_locustSwarmEnds = "Locust Swarm fades from Anub'Rekhan.",--CHAT_MSG_SPELL_AURA_GONE_OTHER
 	
 	bar_locustSwarmCd = "Locust Swarm CD",
 		
 	trigger_impale = "Anub'Rekhan's Impale hits",
 	bar_impale = "Impale CD",
-	trigger_enrage = "Crypt Guard gains Enrage.",
+	
+	trigger_enrage = "Crypt Guard gains Enrage.",--CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS
 	msg_enrage = "Crypt Guard Enrage - Stun + Traps!",
 } end )
 
@@ -63,11 +65,14 @@ local syncName = {
 module:RegisterYellEngage(L["starttrigger1"])
 module:RegisterYellEngage(L["starttrigger2"])
 module:RegisterYellEngage(L["starttrigger3"])
+
 function module:OnEnable()
-	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_CREATURE_BUFF", "Event")
-	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_CREATURE_DAMAGE", "Event")
-	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS", "Event")
-	self:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_OTHER", "Event")
+	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_CREATURE_BUFF", "Event")--Locust
+	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_CREATURE_DAMAGE", "Event")--Impale
+	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_PARTY_DAMAGE", "Event")--Impale
+	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_SELF_DAMAGE", "Event")--Impale
+	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS", "Event")--guardEnrage
+	self:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_OTHER", "Event")--LocustEnd
 	
 	self:ThrottleSync(10, syncName.locustCast)
 	self:ThrottleSync(10, syncName.locustGain)

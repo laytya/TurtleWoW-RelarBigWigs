@@ -55,7 +55,7 @@ L:RegisterTranslations("enUS", function() return {
 	you = "you",
 	HighPriestessJeklik = "High Priestess Jeklik",
 	
-	silence_trigger = "is afflicted by Sonic Burst",
+	silence_trigger = "is afflicted by Sonic Burst",--CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE
 	silence_bar = "Silence CD",
 	silenced_bar = "People are silenced",
 	
@@ -521,5 +521,5 @@ end
 
 function module:Silence()
 	self:Bar(L["silenced_bar"], timer.silenceDur, icon.silence, true, "White")
-	self:DelayedBar(timer.silenceDur, L["silence_bar"], timer.silenceCD, icon.silence, true, "White")
+	self:DelayedBar(timer.silenceDur, L["silence_bar"], timer.silenceCD - timer.silenceDur, icon.silence, true, "White")
 end

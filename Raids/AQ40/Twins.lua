@@ -309,7 +309,7 @@ function module:CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE(msg)
 	if string.find(msg, L["blizzard_trigger"]) then
 		if self.db.profile.blizzard then
 			self:Message(L["blizzard_warn"], "Personal", true, "Alarm")
-			self:WarningSign(icon.blizzard, timer.blizzard)
+			self:WarningSign(icon.blizzard, 0.7)
 		end
 	end
 end
@@ -317,6 +317,7 @@ end
 function module:CHAT_MSG_SPELL_AURA_GONE_SELF(msg)
 	if string.find(msg, L["blizzard_gone_trigger"]) then
 		self:RemoveWarningSign(icon.blizzard)
+		self:Sound("Info")
 	end
 end
 

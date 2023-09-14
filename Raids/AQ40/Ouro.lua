@@ -1,14 +1,10 @@
 
-----------------------------------
---      Module Declaration      --
-----------------------------------
-
 local module, L = BigWigs:ModuleDeclaration("Ouro", "Ahn'Qiraj")
 
+module.revision = 30012
+module.enabletrigger = module.translatedName
+module.toggleoptions = {"popcorn", "sounds", "bigicon", "sweep", "sandblast", -1, "emerge", "submerge", -1, "berserk", "bosskill"}
 
-----------------------------
---      Localization      --
-----------------------------
 L:RegisterTranslations("enUS", function() return {
 	cmd = "Ouro",
 
@@ -180,19 +176,6 @@ L:RegisterTranslations("deDE", function() return {
 	berserksoonwarn = "Berserkerwut in K\195\188rze - Bereit machen!",
 } end )
 
-
----------------------------------
---      	Variables 		   --
----------------------------------
-
--- module variables
-module.revision = 20010 -- To be overridden by the module!
-module.enabletrigger = module.translatedName -- string or table {boss, add1, add2}
---module.wipemobs = { L["add_name"] } -- adds which will be considered in CheckForEngage
-module.toggleoptions = {"popcorn", "sounds", "bigicon", "sweep", "sandblast", -1, "emerge", "submerge", -1, "berserk", "bosskill"}
-
-
--- locals
 local timer = {
 	nextSubmerge = 89,
 	sweep = 1.5,
@@ -213,6 +196,7 @@ local icon = {
 	popcorn = "Spell_Nature_Earthquake",
 	collapse = "Ability_Marksmanship",
 	enrage = "ability_druid_challangingroar",
+	ouroTarget = "spell_shadow_charm",
 }
 local syncName = {
 	sweep = "OuroSweep"..module.revision,
@@ -224,12 +208,6 @@ local syncName = {
 
 local berserkannounced = nil
 
-
-------------------------------
---      Initialization      --
-------------------------------
-
--- called after module is enabled
 function module:OnEnable()
 	self:RegisterEvent("CHAT_MSG_COMBAT_FRIENDLYPLAYER_HITS", "Event")
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE", "Event")
@@ -248,16 +226,17 @@ function module:OnEnable()
 	self:ThrottleSync(10, syncName.berserk)
 
 	self:ScheduleRepeatingEvent("bwouroengagecheck", self.EngageCheck, 0.5, self)
+	
+	ouroCurrentTarget = nil
+	self:ScheduleRepeatingEvent("ouroTargetCheck", self.OuroTarget, 0.5, self)
 end
 
--- called after module is enabled and after each wipe
 function module:OnSetup()
 	berserkannounced = nil
 	self.started = nil
 	self.phase = nil
 end
 
--- called after boss is engaged
 function module:OnEngage()
 
 	self.phase = "emerged"
@@ -280,14 +259,24 @@ function module:OnEngage()
 	end
 end
 
--- called after boss is disengaged (wipe(retreat) or victory)
 function module:OnDisengage()
 end
 
-
-------------------------------
---      Event Handlers	    --
-------------------------------
+function module:OuroTarget()
+	if UnitName("target") == "Ouro" and UnitName("targettarget") ~= nil then
+		if GetRaidTargetIndex("targettarget") ~= 8 and self.db.profile.icon then
+			SetRaidTarget("targettarget",8)
+		end
+		if UnitName("targettarget") ~= ouroCurrentTarget then
+			ouroCurrentTarget = UnitName("targettarget")
+			if ouroCurrentTarget == UnitName("player") then
+				self:SendSay("Ouro targetting " .. UnitName("player") .. "!")
+				self:WarningSign(icon.ouroTarget, 0.5)
+				self:Sound("Long")
+			end
+		end
+	end
+end
 
 function module:UNIT_HEALTH( msg )
 	if UnitName(msg) == boss then
@@ -353,10 +342,6 @@ function module:Popcorn()
 	end
 end
 
-------------------------------
---      Synchronization	    --
-------------------------------
-
 function module:BigWigs_RecvSync(sync, rest, nick)
 	if sync == syncName.sweep and self.db.profile.sweep then
 		self:Sweep()
@@ -370,11 +355,6 @@ function module:BigWigs_RecvSync(sync, rest, nick)
 		self:Berserk()
 	end
 end
-
-
-------------------------------
---      Sync Handlers	    --
-------------------------------
 
 function module:Sweep()
 	if self.db.profile.sweep then
@@ -475,11 +455,6 @@ function module:Berserk()
 		end
 	end
 end
-
-
-------------------------------
---      Utility	Functions   --
-------------------------------
 
 function module:PossibleSubmerge()
 	if self.db.profile.emerge then

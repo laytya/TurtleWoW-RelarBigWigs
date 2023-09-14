@@ -203,7 +203,8 @@ function module:CheckVis(arg1)
 			if self.db.profile.toxinyou and pl == L["you"] and ty == L["are"] then
 				self:Message(L["toxin_self_warn"], "Personal", true, "RunAway")
 				self:Message(UnitName("player") .. L["toxin_warn"], "Important", nil, nil, true)
-				self:WarningSign("Spell_Nature_AbolishMagic", 5)
+				self:WarningSign("Spell_Nature_AbolishMagic", 0.7)
+				self:Sound("Info")
 			elseif self.db.profile.toxinother then
 				self:Message(pl .. L["toxin_warn"], "Important")
 				--self:TriggerEvent("BigWigs_SendTell", pl, L["toxin_self_warn"]) -- can cause whisper bug on nefarian

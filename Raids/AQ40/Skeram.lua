@@ -1,14 +1,9 @@
 
-----------------------------------
---      Module Declaration      --
-----------------------------------
-
 local module, L = BigWigs:ModuleDeclaration("The Prophet Skeram", "Ahn'Qiraj")
 
-
-----------------------------
---      Localization      --
-----------------------------
+module.revision = 30012
+module.enabletrigger = module.translatedName
+module.toggleoptions = {"mc", --[["split",]] "bosskill"}
 
 L:RegisterTranslations("enUS", function() return {
 	mcplayer = "You are afflicted by True Fulfillment.",
@@ -88,17 +83,6 @@ L:RegisterTranslations("deDE", function() return {
 	["You have slain %s!"] = "Ihr habt %s getötet!",
 } end )
 
----------------------------------
---      	Variables 		   --
----------------------------------
-
--- module variables
-module.revision = 20004 -- To be overridden by the module!
-module.enabletrigger = module.translatedName -- string or table {boss, add1, add2}
---module.wipemobs = { L["add_name"] } -- adds which will be considered in CheckForEngage
-module.toggleoptions = {"mc", --[["split",]] "bosskill"}
-
--- locals
 local timer = {
 	mc = 20,
 }
@@ -112,12 +96,6 @@ local syncName = {
 
 local splittime = false
 
-
-------------------------------
---      Initialization      --
-------------------------------
-
--- called after module is enabled
 function module:OnEnable()
 	self:RegisterEvent("CHAT_MSG_MONSTER_YELL")
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE", "Event")
@@ -125,7 +103,6 @@ function module:OnEnable()
 	self:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_SELF", "Event")
 	self:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_PARTY", "Event")
 	self:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_OTHER", "Event")
-	--self:RegisterEvent("CHAT_MSG_COMBAT_FRIENDLY_DEATH", "Event")
 	--self:RegisterEvent("UNIT_HEALTH")
 
 	--[[self:TriggerEvent("BigWigs_ThrottleSync", "SkeramSplit80Soon", 100)
@@ -139,27 +116,17 @@ function module:OnEnable()
 	self:ThrottleSync(1, syncName.mcOver)
 end
 
--- called after module is enabled and after each wipe
 function module:OnSetup()
 	self.started = nil
 	splittime = false
 end
 
--- called after boss is engaged
 function module:OnEngage()
 end
 
--- called after boss is disengaged (wipe(retreat) or victory)
 function module:OnDisengage()
 end
 
-
-
-------------------------------
---      Event Handlers      --
-------------------------------
-
--- override
 function module:CheckForBossDeath(msg)
 	if msg == string.format(UNITDIESOTHER, self:ToString())
 		or msg == string.format(L["You have slain %s!"], self.translatedName) then
@@ -250,55 +217,48 @@ end
 end
 end]]
 
-------------------------------
---      Sync Handlers	    --
-------------------------------
-
 function module:BigWigs_RecvSync(sync, rest, nick)
-	--[[if sync == "SkeramSplit80Soon" then
-	splittime = true
-	if self.db.profile.split then
-	self:Message(L["splitsoon_message"], "Urgent")
-	end
-	elseif sync == "SkeramSplit55Soon" then
-	splittime = true
-	if self.db.profile.split then
-	self:Message(L["splitsoon_message"], "Urgent")
-	end
-	elseif sync == "SkeramSplit30Soon" then
-	splittime = true
-	if self.db.profile.split then
-	self:Message(L["splitsoon_message"], "Urgent")
-	end
-	elseif sync == "SkeramSplit75Now" then
-	splittime = false
-	if self.db.profile.split then
-	self:Message(L["split_message"], "Important", "Alarm")
-	end
-	elseif sync == "SkeramSplit50Now" then
-	splittime = false
-	if self.db.profile.split then
-	self:Message(L["split_message"], "Important", "Alarm")
-	end
-	elseif sync == "SkeramSplit25Now" then
-	splittime = false
-	if self.db.profile.split then
-	self:Message(L["split_message"], "Important", "Alarm")
-	end
-	else]]if sync == syncName.mc then
-		if self.db.profile.mc then
-			if rest == UnitName("player") then
-				self:Bar(string.format(L["mindcontrol_bar"], UnitName("player")), timer.mc, icon.mc, true, "White")
-				self:Message(L["mcplayer_message"], "Attention")
-			else
-				self:Bar(string.format(L["mindcontrol_bar"], rest .. " >Click Me!<"), timer.mc, icon.mc, true, "White")
-				self:SetCandyBarOnClick("BigWigsBar "..string.format(L["mindcontrol_bar"], rest .. " >Click Me!<"), function(name, button, extra) TargetByName(extra, true) end, rest)
-				self:Message(string.format(L["mcplayerother_message"], rest), "Urgent")
-			end
-		end
+	if sync == syncName.mc then
 	elseif sync == syncName.mcOver then
-		if self.db.profile.mc then
-			self:RemoveBar(string.format(L["mindcontrol_bar"], rest .. " >Click Me!<"))
+		self:mcOver(rest)
+	end
+end
+
+function mc(rest)
+	--put a skull on the MC guy
+	for i = 1,GetNumRaidMembers() do
+		if rest == UnitName("raid"..i) then
+			if GetRaidTargetIndex("raid"..i) ~= 8 then
+				SetRaidTarget("raid"..i,8)
+			end
+			break
 		end
+	end
+		
+	if self.db.profile.mc then
+		if rest == UnitName("player") then
+			self:Bar(string.format(L["mindcontrol_bar"], UnitName("player")), timer.mc, icon.mc, true, "White")
+			self:Message(L["mcplayer_message"], "Attention")
+		else
+			self:Bar(string.format(L["mindcontrol_bar"], rest .. " >Click Me!<"), timer.mc, icon.mc, true, "White")
+			self:SetCandyBarOnClick("BigWigsBar "..string.format(L["mindcontrol_bar"], rest .. " >Click Me!<"), function(name, button, extra) TargetByName(extra, true) end, rest)
+			self:Message(string.format(L["mcplayerother_message"], rest), "Urgent")
+		end
+	end
+end
+
+function mcOver(rest)
+	--remove skull
+	for i = 1,GetNumRaidMembers() do
+		if rest == UnitName("raid"..i) then
+			if GetRaidTargetIndex("raid"..i) ~= 8 then
+				SetRaidTarget("raid"..i,0)
+			end
+			break
+		end
+	end
+	
+	if self.db.profile.mc then
+		self:RemoveBar(string.format(L["mindcontrol_bar"], rest .. " >Click Me!<"))
 	end
 end

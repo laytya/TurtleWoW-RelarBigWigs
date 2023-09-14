@@ -3,7 +3,7 @@ local module, L = BigWigs:ModuleDeclaration("Thaddius", "Naxxramas")
 local feugen = AceLibrary("Babble-Boss-2.2")["Feugen"]
 local stalagg = AceLibrary("Babble-Boss-2.2")["Stalagg"]
 
-module.revision = 30008
+module.revision = 30012
 module.enabletrigger = {module.translatedName, feugen, stalagg}
 module.toggleoptions = {"sounds", "bigicon", "enrage", "charge", "polarity", -1, "power", "magneticPull", "phase", "bosskill"}
 
@@ -49,54 +49,49 @@ L:RegisterTranslations("enUS", function() return {
 	feugen = "Feugen",
 	stalagg = "Stalagg",
 	
-	enrage_trigger = "%s goes into a berserker rage!",
+	start_trigger = "Stalagg crush you!", --CHAT_MSG_MONSTER_YELL
+	start_trigger1 = "Feed you to master!", --CHAT_MSG_MONSTER_YELL
+	
+	enrage_trigger = "%s goes into a berserker rage!",--to confirm
 	enrage_warn = "Enrage!",
 	enrage60sec_warn = "Enrage in 60 seconds",
 	enrage30sec_warn = "Enrage in 30 seconds",
 	enrage10sec_warn = "Enrage in 10 seconds",
 	enrage_bar = "Enrage",
+		
+	trigger_feugenDead1 = "Feugen dies.", --CHAT_MSG_COMBAT_HOSTILE_DEATH ok
+	trigger_feugenDead2 = "No... more... Feugen...",--CHAT_MSG_MONSTER_YELL cannot confirm if this exists, would be on feugen death
+	trigger_stalaggDead1 = "Stalagg dies.", --CHAT_MSG_COMBAT_HOSTILE_DEATH ok
+	trigger_stalaggDead2 = "Master save me...",--CHAT_MSG_MONSTER_YELL ok
 	
-	start_trigger = "Stalagg crush you!", --yell
-	start_trigger1 = "Feed you to master!", --yell
-	
-	teslaOverload_trigger = "overloads!",
-	
-	phase2_trigger1 = "EAT YOUR BONES", --yell
-	phase2_trigger2 = "BREAK YOU!", --yell
-	phase2_trigger3 = "KILL!", --yell
-
-	--stalaggDead_trigger = "Stalagg dies.", --"CHAT_MSG_COMBAT_HOSTILE_DEATH"
-	adddeath2 = "Master save me...",
-	--feugenDead_trigger = "Feugen dies.", --"CHAT_MSG_COMBAT_HOSTILE_DEATH"
-	adddeath = "No... more... Feugen...",
-	phase2_14sec_warn = "Thaddius in 14 seconds",
-	
-	powerSurge_trigger = "Stalagg gains Power Surge.",--CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS
-	powerSurge_warn = "Power Surge on Stalagg!",
-	powerSurge_bar = "Power Surge",
-
-	magneticPull_trigger = "casts Magnetic Pull", --?? CHAT_MSG_SPELL_CREATURE_VS_CREATURE_DAMAGE
-	magneticPull_warn = "Magnetic Pull in 5 seconds!",
-	magneticPull_Bar = "Magnetic Pull",
-	
-	phase2_trigger = "overloads!", --emote
-	phase2_warn = "Phase 2, Thaddius in 4 seconds",
-	phase2_bar = "Phase 2",
-	
+	msg_phase2 = "Phase 2",
+	bar_phase2 = "Thaddius Active",
 	polarityPosition_warn = "----- Thaddius +++++",
-	polarityShift_trigger = "Now YOU feel pain!", --yell
+	
+	trigger_3sec = "%s overloads!",--CHAT_MSG_RAID_BOSS_EMOTE
 	
 	polarityShiftCast_trigger = "Thaddius begins to cast Polarity Shift", --?? CHAT_MSG_SPELL_CREATURE_VS_CREATURE_DAMAGE
 	polarityShiftCast_warn = "Polarity Shift inc!",
 	polarityShiftCast_bar = "Polarity Shift Cast",
 	polarityShiftCD_bar = "Polarity Shift CD",
 
+	polarityShift_trigger = "Now YOU feel pain!", --CHAT_MSG_MONSTER_YELL
+	
 	nochange = "Your debuff did not change!",
 	positivetype = "Interface\\Icons\\Spell_ChargePositive",
 	poswarn = "You changed to a Positive Charge!",
 	negativetype = "Interface\\Icons\\Spell_ChargeNegative",
 	negwarn = "You changed to a Negative Charge!",
 	polaritytickbar = "Polarity tick",
+	
+	powerSurge_trigger = "Stalagg gains Power Surge.",--CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS
+	powerSurge_warn = "Power Surge on Stalagg!",
+	powerSurge_bar = "Power Surge",
+
+	magneticPull_Bar = "Magnetic Pull",
+	
+	trigger_manaBurn = "Feugen's Static Field hits you for", --CHAT_MSG_SPELL_CREATURE_VS_SELF_DAMAGE",
+	msg_manaBurn = "Feugen Mana Burned You! 30 yards AoE",
 } end )
 
 L:RegisterTranslations("esES", function() return {
@@ -192,18 +187,17 @@ L:RegisterTranslations("esES", function() return {
 } end )
 
 local timer = {
-	powerSurge = 10,
-	magneticPull = 20.5,
 	enrage = 300,
+	phase2 = 14,
+	
+	powerSurge = 10,
+	--firstMagneticPull = 23.5,
+	magneticPull = 20.5,
+	
+	firstPolarity = {11.6,14.2},--11.6, 14.2
+	polarityShiftCD = 30,--{25,35},
 	polarityShiftCast = 3,
 	polarityTick = 6,
-	
-	firstPolarity = 10,
-	polarityShiftCD = 30,--{25,35},
-	--polarityShiftSoon = 10,
-	phase2 = 4,
-	
-	--transition = 14,
 }
 local icon = {
 	powerSurge = "Spell_Shadow_UnholyFrenzy",
@@ -214,57 +208,75 @@ local icon = {
 	negative = "Spell_ChargeNegative",
 	taunt = "spell_nature_reincarnation",
 	phase2 = "Inv_misc_pocketwatch_01",
+	manaBurn = "Spell_Shadow_ManaBurn",
 }
 local syncName = {
-	powerSurge = "StalaggPower"..module.revision,
-	magneticPull = "ThaddiusMagneticPull"..module.revision,
+	enrage = "ThaddiusEnrage"..module.revision,
+	feugenDeath = "ThaddiusFeugenDeath"..module.revision,
+	stalaggDeath = "ThaddiusStalaggDeath"..module.revision,
 	addsDead = "ThaddiusAddsDead"..module.revision,
 	teslaOverload = "ThaddiusTeslaOverload"..module.revision,
-	phase2 = "ThaddiusPhaseTwo"..module.revision,
-	enrage = "ThaddiusEnrage"..module.revision,
+	
 	polarityShiftCast = "ThaddiusPolarityShiftCast"..module.revision,
 	polarity = "ThaddiusPolarity"..module.revision,
+	
+	powerSurge = "StalaggPower"..module.revision,
+	magneticPull = "ThaddiusMagneticPull"..module.revision,
 }
 
 local phase2started = nil
-local theyAreDead = 0
+local stalaggDead = nil
+local feugenDead = nil
+local bothDead = nil
 local _, playerClass = UnitClass("player")
 
 module:RegisterYellEngage(L["start_trigger"])
 module:RegisterYellEngage(L["start_trigger1"])
 
 function module:OnEnable()
-	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_CREATURE_DAMAGE", "Event")--switched "PolarityCast" to "Event"
-	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS", "Event")--switched "CheckStalagg" to "Event"
-	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_CREATURE_BUFF", "Event")--switched "PolarityCast" to "Event"
-	self:RegisterEvent("CHAT_MSG_RAID_BOSS_EMOTE", "CheckEmotes")
-	self:RegisterEvent("CHAT_MSG_MONSTER_EMOTE", "CheckEmotes")--switched "CheckForEnrage" to "CheckEmotes"
-	self:RegisterEvent("CHAT_MSG_MONSTER_YELL")
+	self:RegisterEvent("CHAT_MSG_COMBAT_HOSTILE_DEATH", "Event")--Stalagg & Feugen Death
+	self:RegisterEvent("CHAT_MSG_MONSTER_YELL", "Event")--Stalagg & Feugen Death, polarity shift done casting
+	self:RegisterEvent("CHAT_MSG_RAID_BOSS_EMOTE", "Event")--p2 in 3 seconds
+	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_CREATURE_DAMAGE", "Event")-- begins casting polarity shift
+	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_SELF_DAMAGE", "Event")-- manaBurn
 
+	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS", "Event")--powerSurge
+	
 	self:ThrottleSync(4, syncName.powerSurge)
-	self:ThrottleSync(5, syncName.magneticPull)
+	
+	self:ThrottleSync(20, syncName.feugenDeath)
+	self:ThrottleSync(20, syncName.stalaggDeath)
 	self:ThrottleSync(20, syncName.addsDead)
-	self:ThrottleSync(10, syncName.teslaOverload)
+	self:ThrottleSync(5, syncName.teslaOverload)
+	
 	self:ThrottleSync(10, syncName.enrage)
-	self:ThrottleSync(20, syncName.phase2)
 	self:ThrottleSync(10, syncName.polarityShiftCast)
 	self:ThrottleSync(10, syncName.polarity)
 end
 
 function module:OnSetup()
-	--self:RegisterEvent("CHAT_MSG_COMBAT_HOSTILE_DEATH", "Event")
 	phase2started = nil
 	
 	self.started = nil
-	self.transition = nil
 	self.previousCharge = ""
 	
-	theyAreDead = 0
+	stalaggDead = false
+	feugenDead = false
+	bothDead = false
+	
 	self.feugenHP = 100
 	self.stalaggHP = 100
 end
 
 function module:OnEngage()
+	phase2started = false
+	
+	self.previousCharge = ""
+	
+	stalaggDead = false
+	feugenDead = false
+	bothDead = false
+	
 	self.feugenHP = 100
 	self.stalaggHP = 100
 	self:TriggerEvent("BigWigs_StartHPBar", self, L["feugen"], 100)
@@ -273,7 +285,8 @@ function module:OnEngage()
 	self:TriggerEvent("BigWigs_SetHPBar", self, L["stalagg"], 0)
 	self:ScheduleRepeatingEvent("bwThaddiusAddCheck", self.CheckAddHP, 0.5, self)
 	if self.db.profile.magneticPull then
-		self:MagneticPull()
+		self:Bar(L["magneticPull_Bar"], timer.magneticPull, icon.magneticPull, true, "blue")
+		self:ScheduleRepeatingEvent("bwThaddiusMagneticPull", self.MagneticPull, timer.magneticPull, self)
 	end
 end
 
@@ -306,6 +319,130 @@ function module:CheckAddHP()
 	end
 end
 
+function module:Event(msg)
+	if string.find(msg, L["enrage_trigger"]) then
+		self:Sync(syncName.enrage)
+	elseif msg == L["trigger_feugenDead1"] or msg == L["trigger_feugenDead2"] then
+		self:Sync(syncName.feugenDeath)
+	elseif msg == L["trigger_stalaggDead1"] or msg == L["trigger_stalaggDead2"] then
+		self:Sync(syncName.stalaggDeath)
+	elseif msg == L["trigger_3sec"] then
+		self:Sync(syncName.teslaOverload)
+	elseif string.find(msg, L["polarityShiftCast_trigger"]) then
+		self:Sync(syncName.polarityShiftCast)
+	elseif string.find(msg, L["polarityShift_trigger"]) then
+		self:Sync(syncName.polarity)
+	elseif string.find(msg, L["powerSurge_trigger"]) then
+		self:Sync(syncName.powerSurge)
+	elseif string.find(msg, L["trigger_manaBurn"]) then
+		self:WarningSign(icon.manaBurn, 0.7)
+		self:Message(L["msg_manaBurn"], "Urgent", true, "Beware")
+	end
+end
+
+
+
+
+function module:BigWigs_RecvSync(sync, rest, nick)
+	if sync == syncName.enrage and self.db.profile.enrage then
+		self:Enrage()
+		
+	elseif sync == syncName.feugenDeath then
+		self:FeugenDeath()
+	elseif sync == syncName.stalaggDeath then
+		self:StalaggDeath()
+	elseif sync == syncName.addsDead and self.db.profile.phase then
+		self:AddsDead()
+	elseif sync == syncName.teslaOverload and self.db.profile.phase then
+		self:ThreeSec()
+		
+	elseif sync == syncName.polarity and self.db.profile.polarity then
+		self:PolarityShift()
+	elseif sync == syncName.polarityShiftCast and self.db.profile.polarity then
+		self:PolarityShiftCast()
+	
+	
+	elseif sync == syncName.powerSurge and self.db.profile.power then
+		self:PowerSurge()
+	end
+end
+
+
+
+
+function module:Enrage()
+	self:RemoveBar(L["enrage_bar"])
+	self:CancelDelayedMessage(L["enrage60sec_warn"])
+	self:CancelDelayedMessage(L["enrage30sec_warn"])
+	self:CancelDelayedMessage(L["enrage10sec_warn"])
+	
+	self:Message(L["enrage_warn"], "Important")
+	self:WarningSign(icon.enrage, 0.7)
+end
+
+function module:FeugenDeath()
+	feugenDead = true
+	if stalaggDead == true then
+		self:Sync(syncName.addsDead)
+	end
+end
+
+function module:StalaggDeath()
+	stalaggDead = true
+	if feugenDead == true then
+		self:Sync(syncName.addsDead)
+	end
+end
+
+function module:AddsDead()
+	phase2started = true
+	
+	--if StopHPBar does not work, do this
+		--self:RemoveBar(L["feugen"])
+		--self:RemoveBar(L["stalagg"])
+	self:TriggerEvent("BigWigs_StopHPBar", self, L["feugen"])
+	self:TriggerEvent("BigWigs_StopHPBar", self, L["stalagg"])
+	self:CancelScheduledEvent("bwThaddiusAddCheck")
+	self:CancelScheduledEvent("bwThaddiusMagneticPull")
+	self:RemoveBar(L["magneticPull_Bar"])
+	self:RemoveBar(L["powerSurge_bar"])
+	self:CancelDelayedWarningSign(icon.taunt)
+	self:CancelDelayedSound("Info")
+	
+	self:Bar(L["bar_phase2"], timer.phase2, icon.phase2, true, "black")
+	self:Message(L["polarityPosition_warn"], nil, nil)
+end
+
+function module:ThreeSec()
+	if phase2started == true then
+		self:RemoveBar(L["bar_phase2"])
+		self:Bar(L["bar_phase2"], 3, icon.phase2, true, "black")
+		self:Message(L["polarityPosition_warn"], nil, nil)
+		
+		if self.db.profile.enrage then
+			self:DelayedBar(3, L["enrage_bar"], timer.enrage, icon.enrage, true, "white")
+			self:DelayedMessage(timer.enrage - 60, L["enrage60sec_warn"], "Urgent")
+			self:DelayedMessage(timer.enrage - 30, L["enrage30sec_warn"], "Important")
+			self:DelayedMessage(timer.enrage - 10, L["enrage10sec_warn"], "Important")
+		end
+		
+		if self.db.profile.polarity then
+			self:DelayedIntervalBar(3, L["polarityShiftCD_bar"], timer.firstPolarity[1], timer.firstPolarity[2], icon.polarityShift, true, "green")
+		end
+	end
+end
+
+function module:PolarityShiftCast()
+	self:RemoveBar(L["polarityShiftCD_bar"])
+	self:Message(L["polarityShiftCast_warn"], "Important")
+	self:Bar(L["polarityShiftCast_bar"], timer.polarityShiftCast, icon.polarityShift, true, "green")
+end
+
+function module:PolarityShift()
+	self:RegisterEvent("PLAYER_AURAS_CHANGED")
+	self:Bar(L["polarityShiftCD_bar"], timer.polarityShiftCD, icon.polarityShift, true, "green")
+end
+
 function module:PLAYER_AURAS_CHANGED(msg)
 	local chargetype = nil
 	local iIterator = 1
@@ -321,98 +458,25 @@ function module:PLAYER_AURAS_CHANGED(msg)
 	end
 	if not chargetype then return end
 	self:UnregisterEvent("PLAYER_AURAS_CHANGED")
-	self:NewPolarity(chargetype)
+	if self.db.profile.charge then
+		self:NewPolarity(chargetype)
+	end
 end
 
 function module:NewPolarity(chargetype)
-	if self.db.profile.charge then
-		if self.previousCharge and self.previousCharge == chargetype then
-			self:Message(L["nochange"], "Urgent", true, "Long")
-		elseif chargetype == L["positivetype"] then
-			self:Message(L["poswarn"], "Positive", true, "RunAway")
-			self:Bar(L["polaritytickbar"], timer.polarityTick, icon.positive, true, "blue")
-			self:WarningSign(icon.positive, 5)
-		elseif chargetype == L["negativetype"] then
-			self:Message(L["negwarn"], "Important", true, "RunAway")
-			self:Bar(L["polaritytickbar"], timer.polarityTick, icon.negative, true, "red")
-			self:WarningSign(icon.negative, 5)
-		end
+	if self.previousCharge and self.previousCharge == chargetype then
+		self:Message(L["nochange"], "Urgent", true, "Long")
+	elseif chargetype == L["positivetype"] then
+		self:Message(L["poswarn"], "Positive", true, "RunAway")
+		self:Bar(L["polaritytickbar"], timer.polarityTick, icon.positive, true, "blue")
+		self:WarningSign(icon.positive, 5)
+	elseif chargetype == L["negativetype"] then
+		self:Message(L["negwarn"], "Important", true, "RunAway")
+		self:Bar(L["polaritytickbar"], timer.polarityTick, icon.negative, true, "red")
+		self:WarningSign(icon.negative, 5)
 	end
+		
 	self.previousCharge = chargetype
-end
-
-function module:CHAT_MSG_MONSTER_YELL( msg )
-	if string.find(msg, L["polarityShift_trigger"]) then
-		self:Sync(syncName.polarity)
-	
-	elseif msg == L["adddeath"] or msg == L["adddeath2"] then
-		theyAreDead = theyAreDead + 1
-		if theyAreDead == 2 then
-			self:Sync(syncName.addsDead)
-		end
-	
-	elseif string.find(msg, L["phase2_trigger1"]) or string.find(msg, L["phase2_trigger2"]) or string.find(msg, L["phase2_trigger3"]) then
-		self:Sync(syncName.phase2)
-	end
-end
-
-function module:Event(msg)
-	if string.find(msg, L["powerSurge_trigger"]) then
-		self:Sync(syncName.powerSurge)
-	end
-	if string.find(msg, L["magneticPull_trigger"]) then
-		self:Sync(syncName.magneticPull)
-	end
-	if string.find(msg, L["polarityShiftCast_trigger"]) then
-		self:Sync(syncName.polarityShiftCast)
-	end
-	
-	--[[
-	BigWigs:CheckForBossDeath(msg, self)
-	if string.find(msg, L["stalaggDead_trigger"]) or string.find(msg, L["feugenDead_trigger"]) then
-		theyAreDead = theyAreDead + 1
-		if theyAreDead == 2 then
-			self:Sync(syncName.addsDead)
-		end
-	end
-	]]--
-end
-
-function module:CheckEmotes(msg)
-	if string.find(msg, L["enrage_trigger"]) then
-		self:Sync(syncName.enrage)
-	end
-	if string.find(msg, L["teslaOverload_trigger"]) then
-		self:Sync(syncName.teslaOverload)
-	end
-end
-
---[[
-function module:CheckStalagg(msg)
-	if msg == L["stalaggtrigger"] then
-		self:Sync(syncName.powerSurge)
-	end
-end
-]]--
-
-function module:BigWigs_RecvSync(sync, rest, nick)
-	if sync == syncName.powerSurge and self.db.profile.power then
-		self:PowerSurge()
-	elseif sync == syncName.magneticPull and self.db.profile.magneticPull then
-		self:MagneticPull()
-	elseif sync == syncName.enrage and self.db.profile.enrage then
-		self:Enrage()
-	elseif sync == syncName.addsDead and self.db.profile.phase then
-		self:AddsDead()
-	elseif sync == syncName.teslaOverload and self.db.profile.phase then
-		self:TeslaOverload()
-	elseif sync == syncName.phase2 then
-		self:Phase2()
-	elseif sync == syncName.polarity and self.db.profile.polarity then
-		self:PolarityShift()
-	elseif sync == syncName.polarityShiftCast and self.db.profile.polarity then
-		self:PolarityShiftCast()
-	end
 end
 
 function module:PowerSurge()
@@ -421,74 +485,6 @@ function module:PowerSurge()
 end
 
 function module:MagneticPull()
+	self:WarningSign(icon.magneticPull, 0.7)
 	self:Bar(L["magneticPull_Bar"], timer.magneticPull, icon.magneticPull, true, "blue")
-	self:DelayedMessage(timer.magneticPull - 5, L["magneticPull_warn"], "Urgent")
-	if playerClass == "WARRIOR" then
-		if self.db.profile.bigicon then
-			self:DelayedWarningSign(timer.magneticPull - 3, icon.taunt, 0.7)
-		end
-		if self.db.profile.sounds then
-			self:DelayedSound(timer.magneticPull - 3, "Info")
-		end
-	end
-end
-
-function module:AddsDead()
-	self:RemoveBar(L["magneticPull_Bar"])
-	self:RemoveBar(L["powerSurge_bar"])
-	self:CancelDelayedWarningSign(icon.taunt)
-	self:CancelDelayedSound("Info")
-	self:CancelDelayedMessage(L["magneticPull_warn"])
-	self:Message(L["phase2_14sec_warn"], "Urgent")
-	self:Message(L["polarityPosition_warn"], nil, nil)
-end
-
-function module:TeslaOverload()
-	self:Bar(L["phase2_bar"], timer.phase2, icon.phase2, true, "black")
-	self:Message(L["phase2_warn"], "Attention")
-	self:Message(L["polarityPosition_warn"], nil, nil)
-	self:Phase2reset()
-end
-
-function module:Enrage()
-	self:Message(L["enrage_warn"], "Important")
-	self:RemoveBar(L["enrage_bar"])
-	self:CancelDelayedMessage(L["enrage60sec_warn"])
-	self:CancelDelayedMessage(L["enrage30sec_warn"])
-	self:CancelDelayedMessage(L["enrage10sec_warn"])
-end
-
-function module:PolarityShiftCast()
-	self:RemoveBar(L["polarityShiftCD_bar"])
-	self:Message(L["polarityShiftCast_warn"], "Important")
-	self:Bar(L["polarityShiftCast_bar"], timer.polarityShiftCast, icon.polarityShift, true, "green")
-end
-
-function module:PolarityShift()
-	self:RegisterEvent("PLAYER_AURAS_CHANGED")
-	self:Bar(L["polarityShiftCD_bar"], timer.polarityShiftCD, icon.polarityShift, true, "green")
-end
-
-function module:Phase2()
-	if phase2started then return end
-	phase2started = true
-	self:Phase2reset()
-	if self.db.profile.enrage then
-		self:Bar(L["enrage_bar"], timer.enrage, icon.enrage, true, "white")
-		self:DelayedMessage(timer.enrage - 60, L["enrage60sec_warn"], "Urgent")
-		self:DelayedMessage(timer.enrage - 30, L["enrage30sec_warn"], "Important")
-		self:DelayedMessage(timer.enrage - 10, L["enrage10sec_warn"], "Important")
-	end
-	self:Bar(L["polarityShiftCD_bar"], timer.firstPolarity, icon.polarityShift, true, "green")
-end
-
-function module:Phase2reset()
-	self:RemoveBar(L["magneticPull_Bar"])
-	self:RemoveBar(L["powerSurge_bar"])
-	self:CancelDelayedWarningSign(icon.taunt)
-	self:CancelDelayedSound("Info")
-	self:CancelDelayedMessage(L["magneticPull_warn"])
-	self:TriggerEvent("BigWigs_StopHPBar", self, L["feugen"])
-	self:TriggerEvent("BigWigs_StopHPBar", self, L["stalagg"])
-	self:CancelScheduledEvent("bwThaddiusAddCheck")
 end
