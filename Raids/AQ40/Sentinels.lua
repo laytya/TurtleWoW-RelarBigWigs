@@ -137,6 +137,7 @@ firstshadowstorm = true
 firstarcref = true
 firstsharef = true
 firstmend = true
+self:RemoveBar(L["sharefwarn"])
 end
 
 function module:OnDisengage()

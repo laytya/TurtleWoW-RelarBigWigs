@@ -148,6 +148,8 @@ function module:OnEngage()
 	bwGuardiansFirst = true
 	bwGuardiansFirstArcRef = true
 	bwGuardiansFirstShaRef = true
+	self:RemoveBar(L["arcrefwarn"])
+	self:RemoveBar(L["sharefwarn"])
 end
 
 function module:OnDisengage()

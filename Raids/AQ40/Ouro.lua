@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Ouro", "Ahn'Qiraj")
 
-module.revision = 30012
+module.revision = 30013
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"popcorn", "sounds", "bigicon", "sweep", "sandblast", -1, "emerge", "submerge", -1, "berserk", "bosskill"}
 
@@ -228,7 +228,6 @@ function module:OnEnable()
 	self:ScheduleRepeatingEvent("bwouroengagecheck", self.EngageCheck, 0.5, self)
 	
 	ouroCurrentTarget = nil
-	self:ScheduleRepeatingEvent("ouroTargetCheck", self.OuroTarget, 0.5, self)
 end
 
 function module:OnSetup()
@@ -257,23 +256,19 @@ function module:OnEngage()
 			self:DelayedWarningSign(timer.earliestFirstSweep - 5, icon.sweep, 0.7)
 		end
 	end
+	
+	ouroCurrentTarget = nil
+	self:ScheduleRepeatingEvent("ouroTargetCheck", self.OuroTarget, 0.5, self)
 end
 
 function module:OnDisengage()
 end
 
 function module:OuroTarget()
-	if UnitName("target") == "Ouro" and UnitName("targettarget") ~= nil then
-		if GetRaidTargetIndex("targettarget") ~= 8 and self.db.profile.icon then
-			SetRaidTarget("targettarget",8)
-		end
-		if UnitName("targettarget") ~= ouroCurrentTarget then
-			ouroCurrentTarget = UnitName("targettarget")
-			if ouroCurrentTarget == UnitName("player") then
-				self:SendSay("Ouro targetting " .. UnitName("player") .. "!")
-				self:WarningSign(icon.ouroTarget, 0.5)
-				self:Sound("Long")
-			end
+	if UnitName("target") ~= nil and UnitName("targettarget") ~= nil and (IsRaidLeader() or IsRaidOfficer()) then
+		SetRaidTarget("targettarget",8)
+		if UnitName("targettarget") == UnitName("player") then
+			SendChatMessage("Ouro targetting "..UnitName("player").."!","SAY")
 		end
 	end
 end
@@ -318,19 +313,6 @@ function module:Event(msg)
 		self:Popcorn()
 	end
 end
-
-function module:CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS(msg)
-	
-end
-
-function module:CHAT_MSG_SPELL_CREATURE_VS_SELF_DAMAGE( msg )
-	
-end
-
-function module:CHAT_MSG_SPELL_CREATURE_VS_CREATURE_DAMAGE( msg )
-	
-end
-
 
 
 function module:Popcorn()
@@ -391,7 +373,7 @@ function module:Emerge()
 		self:DebugMessage("emerged module")
 		self:CancelScheduledEvent("bwourosubmergecheck")
 		self:ScheduleEvent("bwourosubmergecheck", self.DoSubmergeCheck, 5, self)
-		--self:ScheduleRepeatingEvent("bwourosubmergecheck", self.SubmergeCheck, 1, self)
+
 		self:CancelScheduledEvent("bwsubmergewarn")
 		self:RemoveBar(L["submergebartext"])
 
@@ -470,7 +452,6 @@ function module:PossibleSubmerge()
 end
 
 function module:SubmergeCheck()
-	-- if the player is dead he can't see ouro: omit this check
 	if self.phase == "emerged" then
 		if not UnitIsDeadOrGhost("player") and not self:IsOuroVisible() then
 			self:DebugMessage("OuroSubmerge")
@@ -481,7 +462,6 @@ end
 
 function module:EngageCheck()
 	if not self.engaged then
-		--self:ScheduleRepeatingEvent("bwouroengagecheck", self.EngageCheck, 1, self)
 		if self:IsOuroVisible() then
 			module:CancelScheduledEvent("bwouroengagecheck")
 
