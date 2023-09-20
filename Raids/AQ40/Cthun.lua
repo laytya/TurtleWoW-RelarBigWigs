@@ -640,7 +640,11 @@ function module:DelayedEyeBeamCheck()
 	self:CheckTarget()
 	if eyeTarget then
 		name = eyeTarget
-		self:Icon(name)
+		if IsRaidLeader() or IsRaidOfficer() then
+			TargetByName(name,true)
+			SetRaidTarget("target",8)
+			TargetLastTarget()
+		end
 		if name == UnitName("player") then
 			self:WarningSign(icon.eyeBeamSelf, 2 - 0.1)
 			SendChatMessage("Eye Beam On Me !", "SAY")
