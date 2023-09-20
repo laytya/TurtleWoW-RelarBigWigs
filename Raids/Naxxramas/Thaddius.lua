@@ -3,7 +3,7 @@ local module, L = BigWigs:ModuleDeclaration("Thaddius", "Naxxramas")
 local feugen = AceLibrary("Babble-Boss-2.2")["Feugen"]
 local stalagg = AceLibrary("Babble-Boss-2.2")["Stalagg"]
 
-module.revision = 30012
+module.revision = 30014
 module.enabletrigger = {module.translatedName, feugen, stalagg}
 module.toggleoptions = {"sounds", "bigicon", "enrage", "charge", "polarity", -1, "power", "magneticPull", "phase", "bosskill"}
 
@@ -90,7 +90,8 @@ L:RegisterTranslations("enUS", function() return {
 
 	magneticPull_Bar = "Magnetic Pull",
 	
-	trigger_manaBurn = "Feugen's Static Field hits you for", --CHAT_MSG_SPELL_CREATURE_VS_SELF_DAMAGE",
+	trigger_manaBurn = "Feugen's Static Field hits you for", --CHAT_MSG_SPELL_CREATURE_VS_SELF_DAMAGE
+	trigger_manaBurn2 = "You absorb Feugen's Static Field.",--CHAT_MSG_SPELL_CREATURE_VS_SELF_DAMAGE
 	msg_manaBurn = "Feugen Mana Burned You! 30 yards AoE",
 } end )
 
@@ -239,7 +240,6 @@ function module:OnEnable()
 	self:RegisterEvent("CHAT_MSG_RAID_BOSS_EMOTE", "Event")--p2 in 3 seconds
 	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_CREATURE_DAMAGE", "Event")-- begins casting polarity shift
 	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_SELF_DAMAGE", "Event")-- manaBurn
-
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS", "Event")--powerSurge
 	
 	self:ThrottleSync(4, syncName.powerSurge)
@@ -334,7 +334,7 @@ function module:Event(msg)
 		self:Sync(syncName.polarity)
 	elseif string.find(msg, L["powerSurge_trigger"]) then
 		self:Sync(syncName.powerSurge)
-	elseif string.find(msg, L["trigger_manaBurn"]) then
+	elseif string.find(msg, L["trigger_manaBurn"]) or string.find(msg, L["trigger_manaBurn2"]) then
 		self:WarningSign(icon.manaBurn, 0.7)
 		self:Message(L["msg_manaBurn"], "Urgent", true, "Beware")
 	end

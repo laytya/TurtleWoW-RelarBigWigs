@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Anubisath Sentinel", "Ahn'Qiraj")
 
-module.revision = 30009
+module.revision = 30014
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"abilities"}
 module.trashMod = true
@@ -98,8 +98,8 @@ local syncName = {
 mendraidicon = 8
 thornsraidicon = 7
 mortalstrikeraidicon = 6
-sharefraidicon = 1
-arcrefraidicon = "No Icon"
+--sharefraidicon = 1
+--arcrefraidicon = "No Icon"
 knockbackraidicon = 2
 thunderclapraidicon = 3
 manaburnraidicon = 4
@@ -258,8 +258,10 @@ function module:Abilities(msg)
 				self:Sync(syncName.manaburn .. " "..manaburnicon)
 				self:IntervalBar(string.format(manaburnicon .. L["manaburnwarn"]), timer.manaburn, timer.manaburn, icon.manaburn, true, color.manaburn)
 				firstmanaburn = false
-			else
-				SetRaidTarget("target", manaburnraidicon)
+			elseif UnitName("target")~= nil then
+				if UnitName("target") == "Anubisath Sentinel" then
+					SetRaidTarget("target", manaburnraidicon)
+				end
 			end			
 		end
 	end
@@ -279,8 +281,10 @@ function module:Abilities(msg)
 				self:Sync(syncName.thunderclap .. " "..thunderclapicon)
 				self:IntervalBar(string.format(thunderclapicon .. L["thunderclapwarn"]), timer.thunderclap, timer.thunderclap, icon.thunderclap, true, color.thunderclap)
 				firstthunderclap = false
-			else
-				SetRaidTarget("target", thunderclapraidicon)
+			elseif UnitName("target")~= nil then
+				if UnitName("target") == "Anubisath Sentinel" then
+					SetRaidTarget("target", thunderclapraidicon)
+				end
 			end			
 		end
 	end
@@ -300,8 +304,10 @@ function module:Abilities(msg)
 				self:Sync(syncName.thorns .. " "..thornsicon)
 				self:IntervalBar(string.format(thornsicon .. L["thornswarn"]), timer.thorns, timer.thorns, icon.thorns, true, color.thorns)
 				firstthorns = false
-			else
-				SetRaidTarget("target", thornsraidicon)
+			elseif UnitName("target")~= nil then
+				if UnitName("target") == "Anubisath Sentinel" then
+					SetRaidTarget("target", thornsraidicon)
+				end
 			end			
 		end
 	end
@@ -321,8 +327,10 @@ function module:Abilities(msg)
 				self:Sync(syncName.knockback .. " "..knockbackicon)
 				self:IntervalBar(string.format(knockbackicon .. L["knockbackwarn"]), timer.knockback, timer.knockback, icon.knockback, true, color.knockback)
 				firstknockback = false
-			else
-				SetRaidTarget("target", knockbackraidicon)
+			elseif UnitName("target")~= nil then
+				if UnitName("target") == "Anubisath Sentinel" then
+					SetRaidTarget("target", knockbackraidicon)
+				end
 			end			
 		end
 	end
@@ -342,8 +350,10 @@ function module:Abilities(msg)
 				self:Sync(syncName.mortalstrike .. " "..mortalstrikeicon)
 				self:IntervalBar(string.format(mortalstrikeicon .. L["mortalstrikewarn"]), timer.mortalstrike, timer.mortalstrike, icon.mortalstrike, true, color.mortalstrike)
 				firstmortalstrike = false
-			else
-				SetRaidTarget("target", mortalstrikeraidicon)
+			elseif UnitName("target")~= nil then
+				if UnitName("target") == "Anubisath Sentinel" then
+					SetRaidTarget("target", mortalstrikeraidicon)
+				end
 			end			
 		end
 	end
@@ -363,12 +373,37 @@ function module:Abilities(msg)
 				self:Sync(syncName.shadowstorm .. " "..shadowstormicon)
 				self:IntervalBar(string.format(shadowstormicon .. L["shadowstormwarn"]), timer.shadowstorm, timer.shadowstorm, icon.shadowstorm, true, color.shadowstorm)
 				firstshadowstorm = false
-			else
-				SetRaidTarget("target", shadowstormraidicon)
-			end			
+			elseif UnitName("target")~= nil then
+				if UnitName("target") == "Anubisath Sentinel" then
+					SetRaidTarget("target", shadowstormraidicon)
+				end
+			end	
 		end
 	end
 
+	--Mend
+	if firstmend == true then
+		if UnitBuff("target",1) == L["mendbufficon"] then
+			if GetRaidTargetIndex("target")~= nil then 
+				if GetRaidTargetIndex("target")==1 then mendicon = "Star"; end
+				if GetRaidTargetIndex("target")==2 then mendicon = "Circle"; end
+				if GetRaidTargetIndex("target")==3 then mendicon = "Diamond"; end
+				if GetRaidTargetIndex("target")==4 then mendicon = "Triangle"; end
+				if GetRaidTargetIndex("target")==5 then mendicon = "Moon"; end
+				if GetRaidTargetIndex("target")==6 then mendicon = "Square"; end
+				if GetRaidTargetIndex("target")==7 then mendicon = "Cross"; end
+				if GetRaidTargetIndex("target")==8 then mendicon = "Skull"; end
+				self:Sync(syncName.mend .. " "..mendicon)
+				self:IntervalBar(string.format(mendicon .. L["mendwarn"]), timer.mend, timer.mend, icon.mend, true, color.mend)
+				firstmend = false
+			elseif UnitName("target")~= nil then
+				if UnitName("target") == "Anubisath Sentinel" then
+					SetRaidTarget("target", mendraidicon)
+				end
+			end			
+		end
+	end
+	
 	-- Arcane Reflect
 	if firstarcref == true then
 		if string.find(msg, L["arcreftrigger"]) then
@@ -393,30 +428,8 @@ function module:Abilities(msg)
 			self:Sync(syncName.sharef)
 			self:IntervalBar(string.format(L["sharefwarn"]), timer.sharef, timer.sharef, icon.sharef, true, color.sharef)
 			firstsharef = false
-		else
-			SetRaidTarget("target", sharefraidicon)
+		--else
+		--	SetRaidTarget("target", sharefraidicon)
 		end
 	end
-	
-	--Mend
-	if firstmend == true then
-		if UnitBuff("target",1) == L["mendbufficon"] then
-			if GetRaidTargetIndex("target")~= nil then 
-				if GetRaidTargetIndex("target")==1 then mendicon = "Star"; end
-				if GetRaidTargetIndex("target")==2 then mendicon = "Circle"; end
-				if GetRaidTargetIndex("target")==3 then mendicon = "Diamond"; end
-				if GetRaidTargetIndex("target")==4 then mendicon = "Triangle"; end
-				if GetRaidTargetIndex("target")==5 then mendicon = "Moon"; end
-				if GetRaidTargetIndex("target")==6 then mendicon = "Square"; end
-				if GetRaidTargetIndex("target")==7 then mendicon = "Cross"; end
-				if GetRaidTargetIndex("target")==8 then mendicon = "Skull"; end
-				self:Sync(syncName.mend .. " "..mendicon)
-				self:IntervalBar(string.format(mendicon .. L["mendwarn"]), timer.mend, timer.mend, icon.mend, true, color.mend)
-				firstmend = false
-			else
-				SetRaidTarget("target", mendraidicon)
-			end			
-		end
-	end
-
 end
