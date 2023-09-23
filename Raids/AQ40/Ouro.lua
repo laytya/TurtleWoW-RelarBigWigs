@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Ouro", "Ahn'Qiraj")
 
-module.revision = 30013
+module.revision = 30015
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"popcorn", "sounds", "bigicon", "sweep", "sandblast", -1, "emerge", "submerge", -1, "berserk", "bosskill"}
 
@@ -266,9 +266,11 @@ end
 
 function module:OuroTarget()
 	if UnitName("target") ~= nil and UnitName("targettarget") ~= nil and (IsRaidLeader() or IsRaidOfficer()) then
-		SetRaidTarget("targettarget",8)
-		if UnitName("targettarget") == UnitName("player") then
-			SendChatMessage("Ouro targetting "..UnitName("player").."!","SAY")
+		if UnitName("target") == "Ouro" then
+			SetRaidTarget("targettarget",8)
+			if UnitName("targettarget") == UnitName("player") then
+				SendChatMessage("Ouro targetting "..UnitName("player").."!","SAY")
+			end
 		end
 	end
 end
