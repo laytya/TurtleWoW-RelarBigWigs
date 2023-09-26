@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Heigan the Unclean", "Naxxramas")
 
-module.revision = 30012
+module.revision = 30018
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"disease", "manaBurn", "teleport", "erruption", -1, "bosskill"}
 
@@ -36,7 +36,9 @@ L:RegisterTranslations("enUS", function() return {
 	
 	trigger_manaBurn = "Heigan the Unclean's Mana Burn",--CHAT_MSG_SPELL_CREATURE_VS_CREATURE_DAMAGE // CHAT_MSG_SPELL_CREATURE_VS_PARTY_DAMAGE // CHAT_MSG_SPELL_CREATURE_VS_SELF_DAMAGE
 	bar_manaBurn = "Mana Burn CD",
-	msg_manaBurn = "Mana Burn",
+	
+	trigger_manaBurnYou = "Heigan the Unclean's Mana Burn hits you for",--CHAT_MSG_SPELL_CREATURE_VS_SELF_DAMAGE
+	msg_manaBurnYou = "Mana Burn hit you!",
 
 	trigger_danceStart = "The end is upon you.",--CHAT_MSG_MONSTER_YELL
 	msg_danceStart = "Teleport!",
@@ -141,6 +143,14 @@ function module:OnDisengage()
 end
 
 function module:Event(msg)
+	if string.find(msg, L["trigger_manaBurnYou"]) then
+		if self.db.profile.manaBurn then
+			if UnitClass("Player") ~= "Rogue" and UnitClass("Player") ~= "Warrior" then
+				self:Message(L["msg_manaBurnYou"], "Important", nil, "Info")
+				self:WarningSign(icon.manaBurn, 0.7)
+			end
+		end
+	end
 	if string.find(msg, L["trigger_die"]) then
 		self:SendBossDeathSync()
 	elseif string.find(msg, L["trigger_disease"]) then
@@ -184,9 +194,6 @@ function module:ManaBurn()
 	--start a bar only if enough time left before dancing
 	if timer.manaBurnCD < (timer.fightDuration - (GetTime() - bwHeiganTimeFloorStarted)) then
 		self:Bar(L["bar_manaBurn"], timer.manaBurnCD, icon.manaBurn, true, "Blue")
-	end
-	if UnitClass("Player") ~= "Rogue" and UnitClass("Player") ~= "Warrior" then
-		self:Message(L["msg_manaBurn"], "Important", nil, "Info")
 	end
 end
 
