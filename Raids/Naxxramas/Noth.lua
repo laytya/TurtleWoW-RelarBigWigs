@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Noth the Plaguebringer", "Naxxramas")
 
-module.revision = 30012
+module.revision = 30017
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"blink", "teleport", "curse", "cripple", -1, "wave", "bosskill"}
 
@@ -193,7 +193,7 @@ end
 
 
 function module:Curse()
-	RemoveBar(L["bar_curse"])
+	self:RemoveBar(L["bar_curse"])
 	if GetTime() < (bwTimeInRoom + timer.room - timer.curse[1]) then
 		self:IntervalBar(L["bar_curse"], timer.curse[1], timer.curse[2], icon.curse, true, "Red")
 	end
@@ -205,7 +205,7 @@ function module:Curse()
 end
 
 function module:Cripple()
-	RemoveBar(L["bar_cripple"])
+	self:RemoveBar(L["bar_cripple"])
 	if GetTime() < (bwTimeInRoom + timer.room - timer.cripple[1]) then
 		self:IntervalBar(L["bar_cripple"], timer.cripple[1], timer.cripple[2], icon.cripple, true, "Cyan")
 	end
@@ -217,7 +217,7 @@ function module:Cripple()
 end
 
 function module:Blink()
-	RemoveBar(L["bar_blink"])
+	self:RemoveBar(L["bar_blink"])
 	self:Message(L["msg_blink"], "Important")
 	if GetTime() < (bwTimeInRoom + timer.room - timer.regularBlink[1]) then
 		self:IntervalBar(L["bar_blink"], timer.regularBlink[1], timer.regularBlink[2], icon.blink, true, "Blue")
@@ -225,7 +225,7 @@ function module:Blink()
 end
 
 function module:NextRoomWave()
-	RemoveBar(L["bar_roomWave"])
+	self:RemoveBar(L["bar_roomWave"])
 	if GetTime() < (bwTimeInRoom + timer.room - timer.nextWarriorWave) then
 		self:Bar(L["bar_roomWave"], timer.nextWarriorWave, icon.add, true, "Black")
 	end

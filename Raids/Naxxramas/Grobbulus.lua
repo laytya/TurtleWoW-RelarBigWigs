@@ -50,6 +50,7 @@ L:RegisterTranslations("enUS", function() return {
 	bar_cloudCD = "Poison Cloud CD",
 	msg_cloudCast = "Cloud -- Move Grobbulus!",
 	trigger_cloudHitsYou = "Grobbulus Cloud's Poison hits you",--CHAT_MSG_SPELL_CREATURE_VS_SELF_DAMAGE
+	--trigger_cloudHitsOther = "Grobbulus Cloud's Poison hits (.+) for", --CHAT_MSG_SPELL_CREATURE_VS_CREATURE_DAMAGE // CHAT_MSG_SPELL_CREATURE_VS_PARTY_DAMAGE
 } end )
 
 L:RegisterTranslations("esES", function() return {
