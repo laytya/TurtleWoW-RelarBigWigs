@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Anubisath Sentinel", "Ahn'Qiraj")
 
-module.revision = 30014
+module.revision = 30019
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"abilities"}
 module.trashMod = true
@@ -24,10 +24,11 @@ L:RegisterTranslations("enUS", function() return {
     mendwarn = " has Mending!",
     sharefwarn = "?? has Shadow and Frost!",
 	arcrefwarn = " has Fire and Arcane!",
+
+	trigger_arcaneFireReflectYou = "Your Detect Magic is reflected back by Anubisath Sentinel.",--CHAT_MSG_SPELL_SELF_DAMAGE
+	trigger_arcaneFireReflectOther = "(.+)'s Detect Magic is reflected back by Anubisath Sentinel.",--CHAT_MSG_SPELL_FRIENDLYPLAYER_DAMAGE // CHAT_MSG_SPELL_PARTY_DAMAGE
 	
-	arcreftrigger = "Detect Magic is reflected",--OTHERPLAYER's Detect Magic is reflected back by Anubisath Guardian. CHAT_MSG_SPELL_FRIENDLYPLAYER_DAMAGE",
-	
-	shareftrigger = "Anubisath Guardian is afflicted by Detect Magic.",--CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE
+	shareftrigger = "Anubisath Sentinel is afflicted by Detect Magic.",--CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE
 	
 	manaburnbufficon = "Interface\\Icons\\Spell_Shadow_ManaBurn",
 	thunderclapbufficon = "Interface\\Icons\\Ability_ThunderClap",
@@ -141,66 +142,6 @@ self:RemoveBar(L["sharefwarn"])
 end
 
 function module:OnDisengage()
-end
-
-function module:BigWigs_RecvSync(sync, rest, nick)
-	if sync == syncName.manaburn then
-		if firstmanaburn == true then
-			self:IntervalBar(string.format(rest .. L["manaburnwarn"]), timer.manaburn, timer.manaburn, icon.manaburn, true, color.manaburn)
-			self:Message("Pull " .. rest .. " Away!", "Attention")
-			firstmanaburn = false
-		end
-		
-	elseif sync == syncName.thunderclap then
-		if firstthunderclap == true then
-			self:IntervalBar(string.format(rest .. L["thunderclapwarn"]), timer.thunderclap, timer.thunderclap, icon.thunderclap, true, color.thunderclap)
-			firstthunderclap = false
-		end
-		
-	elseif sync == syncName.thorns then
-		if firstthorns == true then
-			self:IntervalBar(string.format(rest .. L["thornswarn"]), timer.thorns, timer.thorns, icon.thorns, true, color.thorns)
-			firstthorns = false
-		end
-		
-	elseif sync == syncName.knockback then
-		if firstknockback == true then
-			self:IntervalBar(string.format(rest .. L["knockbackwarn"]), timer.knockback, timer.knockback, icon.knockback, true, color.knockback)
-			firstknockback = false
-		end
-		
-	elseif sync == syncName.mortalstrike then
-		if firstmortalstrike == true then
-			self:IntervalBar(string.format(rest .. L["mortalstrikewarn"]), timer.mortalstrike, timer.mortalstrike, icon.mortalstrike, true, color.mortalstrike)
-			firstmortalstrike = false
-		end
-		
-	elseif sync == syncName.shadowstorm then
-		if firstshadowstorm == true then
-			self:IntervalBar(string.format(rest .. L["shadowstormwarn"]), timer.shadowstorm, timer.shadowstorm, icon.shadowstorm, true, color.shadowstorm)
-			self:Message("Stack ".. rest .. " on Casters!", "Attention")
-			firstshadowstorm = false
-		end
-		
-	elseif sync == syncName.arcref then
-		if firstarcref == true then
-			self:IntervalBar(string.format(rest .. L["arcrefwarn"]), timer.arcref, timer.arcref, icon.arcref, true, color.arcref)
-			firstarcref = false
-		end
-		
-	elseif sync == syncName.sharef then
-		if firstsharef == true then
-			self:IntervalBar(string.format(L["sharefwarn"]), timer.sharef, timer.sharef, icon.sharef, true, color.sharef)
-			firstsharef = false
-		end
-		
-	elseif sync == syncName.mend then
-		if firstmend == true then
-			self:IntervalBar(string.format(rest .. L["mendwarn"]), timer.mend, timer.mend, icon.mend, true, color.mend)
-			firstmend = false
-		end
-		
-	end
 end
 
 function module:CheckForBossDeath(msg)
@@ -404,9 +345,10 @@ function module:Abilities(msg)
 		end
 	end
 	
+	
 	-- Arcane Reflect
 	if firstarcref == true then
-		if string.find(msg, L["arcreftrigger"]) then
+		if string.find(msg, L["trigger_arcaneFireReflectYou"]) then
 			if GetRaidTargetIndex("target")== nil then arcreficon = "No Icon" end
 			if GetRaidTargetIndex("target")==1 then arcreficon = "Star"; end
 			if GetRaidTargetIndex("target")==2 then arcreficon = "Circle"; end
@@ -421,7 +363,30 @@ function module:Abilities(msg)
 			firstarcref = false
 		end
 	end
-
+	
+	if firstarcref == true then
+		if string.find(msg, L["trigger_arcaneFireReflectOther"]) then
+			local _,_, reflectPerson, _ = string.find(msg, L["trigger_arcaneFireReflectOther"])
+			
+			TargetByName(reflectPerson,true)
+			if GetRaidTargetIndex("targettarget")== nil then arcreficon = "No Icon" end
+			if GetRaidTargetIndex("targettarget")==1 then arcreficon = "Star"; end
+			if GetRaidTargetIndex("targettarget")==2 then arcreficon = "Circle"; end
+			if GetRaidTargetIndex("targettarget")==3 then arcreficon = "Diamond"; end
+			if GetRaidTargetIndex("targettarget")==4 then arcreficon = "Triangle"; end
+			if GetRaidTargetIndex("targettarget")==5 then arcreficon = "Moon"; end
+			if GetRaidTargetIndex("targettarget")==6 then arcreficon = "Square"; end
+			if GetRaidTargetIndex("targettarget")==7 then arcreficon = "Cross"; end
+			if GetRaidTargetIndex("targettarget")==8 then arcreficon = "Skull"; end
+			TargetLastTarget()
+			
+			self:Sync(syncName.arcref .. " "..arcreficon)
+			self:IntervalBar(string.format(arcreficon .. L["arcrefwarn"]), timer.arcref, timer.arcref, icon.arcref, true, color.arcref)
+			firstarcref = false
+		end
+	end
+			
+			
 	-- Shadow Reflect
 	if firstsharef == true then
 		if string.find(msg, L["shareftrigger"]) then
@@ -431,5 +396,65 @@ function module:Abilities(msg)
 		--else
 		--	SetRaidTarget("target", sharefraidicon)
 		end
+	end
+end
+
+function module:BigWigs_RecvSync(sync, rest, nick)
+	if sync == syncName.manaburn then
+		if firstmanaburn == true then
+			self:IntervalBar(string.format(rest .. L["manaburnwarn"]), timer.manaburn, timer.manaburn, icon.manaburn, true, color.manaburn)
+			self:Message("Pull " .. rest .. " Away!", "Attention")
+			firstmanaburn = false
+		end
+		
+	elseif sync == syncName.thunderclap then
+		if firstthunderclap == true then
+			self:IntervalBar(string.format(rest .. L["thunderclapwarn"]), timer.thunderclap, timer.thunderclap, icon.thunderclap, true, color.thunderclap)
+			firstthunderclap = false
+		end
+		
+	elseif sync == syncName.thorns then
+		if firstthorns == true then
+			self:IntervalBar(string.format(rest .. L["thornswarn"]), timer.thorns, timer.thorns, icon.thorns, true, color.thorns)
+			firstthorns = false
+		end
+		
+	elseif sync == syncName.knockback then
+		if firstknockback == true then
+			self:IntervalBar(string.format(rest .. L["knockbackwarn"]), timer.knockback, timer.knockback, icon.knockback, true, color.knockback)
+			firstknockback = false
+		end
+		
+	elseif sync == syncName.mortalstrike then
+		if firstmortalstrike == true then
+			self:IntervalBar(string.format(rest .. L["mortalstrikewarn"]), timer.mortalstrike, timer.mortalstrike, icon.mortalstrike, true, color.mortalstrike)
+			firstmortalstrike = false
+		end
+		
+	elseif sync == syncName.shadowstorm then
+		if firstshadowstorm == true then
+			self:IntervalBar(string.format(rest .. L["shadowstormwarn"]), timer.shadowstorm, timer.shadowstorm, icon.shadowstorm, true, color.shadowstorm)
+			self:Message("Stack ".. rest .. " on Casters!", "Attention")
+			firstshadowstorm = false
+		end
+		
+	elseif sync == syncName.arcref then
+		if firstarcref == true then
+			self:IntervalBar(string.format(rest .. L["arcrefwarn"]), timer.arcref, timer.arcref, icon.arcref, true, color.arcref)
+			firstarcref = false
+		end
+		
+	elseif sync == syncName.sharef then
+		if firstsharef == true then
+			self:IntervalBar(string.format(L["sharefwarn"]), timer.sharef, timer.sharef, icon.sharef, true, color.sharef)
+			firstsharef = false
+		end
+		
+	elseif sync == syncName.mend then
+		if firstmend == true then
+			self:IntervalBar(string.format(rest .. L["mendwarn"]), timer.mend, timer.mend, icon.mend, true, color.mend)
+			firstmend = false
+		end
+		
 	end
 end

@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("The Prophet Skeram", "Ahn'Qiraj")
 
-module.revision = 30013
+module.revision = 30019
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"mc", "bosskill"}
 
@@ -38,8 +38,6 @@ local syncName = {
 	mc = "SkeramMC"..module.revision,
 }
 
-local splittime = false
-
 function module:OnEnable()
 	self:RegisterEvent("CHAT_MSG_MONSTER_YELL")--trigger_kill
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE", "Event")--mcYou
@@ -49,6 +47,7 @@ function module:OnEnable()
 end
 
 function module:OnSetup()
+	self.started = nil
 end
 
 function module:OnEngage()
@@ -60,13 +59,59 @@ end
 function module:CheckForWipe()
 end
 
+function module:CheckForBossDeath(msg)
+	if msg == string.format(UNITDIESOTHER, self:ToString())
+		or msg == string.format(L["You have slain %s!"], self.translatedName) then
+		local function IsBossInCombat()
+			local t = module.enabletrigger
+			if not t then return false end
+			if type(t) == "string" then t = {t} end
+
+			if UnitExists("target") and UnitAffectingCombat("target") then
+				local target = UnitName("target")
+				for _, mob in pairs(t) do
+					if target == mob then
+						return true
+					end
+				end
+			end
+
+			local num = GetNumRaidMembers()
+			for i = 1, num do
+				local raidUnit = string.format("raid%starget", i)
+				if UnitExists(raidUnit) and UnitAffectingCombat(raidUnit) then
+					local target = UnitName(raidUnit)
+					for _, mob in pairs(t) do
+						if target == mob then
+							return true
+						end
+					end
+				end
+			end
+			return false
+		end
+
+		if not IsBossInCombat() then
+			self:SendBossDeathSync()
+		end
+	end
+end
+
 function module:CHAT_MSG_MONSTER_YELL(msg)
-	if msg == L["kill_trigger"] then
-		module:SendBossDeathSync()
+	if string.find(msg, L["kill_trigger"]) then
+		BigWigs:Debug("yell kill trigger")
 	end
 end
 
 function module:Event(msg)
+	if UnitName("target") ~= nil and (IsRaidLeader() or IsRaidOfficer()) then
+		if UnitName("target") == "The Prophet Skeram" then
+			if UnitHealthMax("target") > 350000 then
+				SetRaidTarget("target",6)
+			end
+		end
+	end
+	
 	if msg == L["trigger_mcYou"] then
 		self:Sync(syncName.mc .. " " .. UnitName("player"))
 	elseif string.find(msg, L["trigger_mcOther"]) then

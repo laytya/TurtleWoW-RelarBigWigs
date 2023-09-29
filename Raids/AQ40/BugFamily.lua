@@ -5,7 +5,7 @@ local kri = AceLibrary("Babble-Boss-2.2")["Lord Kri"]
 local yauj = AceLibrary("Babble-Boss-2.2")["Princess Yauj"]
 local vem = AceLibrary("Babble-Boss-2.2")["Vem"]
 
-module.revision = 30013
+module.revision = 30019
 module.enabletrigger = {kri, yauj, vem}
 module.toggleoptions = {"panic", "toxicvolley", "heal", "announce", "deathspecials", "enrage", "bosskill"}
 
@@ -283,7 +283,7 @@ function module:VemDead()
 	vemdead = true
 	
 	if self.db.profile.deathspecials then
-		elf:Message(L["msg_vemDead"], "Positive")
+		self:Message(L["msg_vemDead"], "Positive")
 	end
 	if yaujdead and kridead then
 		self:Sync(syncName.allDead)

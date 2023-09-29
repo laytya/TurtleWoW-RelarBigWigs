@@ -258,7 +258,7 @@ L:RegisterTranslations("deDE", function() return {
 ---------------------------------
 
 -- module variables
-module.revision = 20011 -- To be overridden by the module!
+module.revision = 30019 -- To be overridden by the module!
 local eyeofcthun = AceLibrary("Babble-Boss-2.2")["Eye of C'Thun"]
 local cthun = AceLibrary("Babble-Boss-2.2")["C'Thun"]
 module.enabletrigger = {eyeofcthun, cthun} -- string or table {boss, add1, add2}
@@ -640,7 +640,11 @@ function module:DelayedEyeBeamCheck()
 	self:CheckTarget()
 	if eyeTarget then
 		name = eyeTarget
-		self:Icon(name)
+		TargetByName(name,true)
+		if UnitName("target") ~= nil and (IsRaidLeader() or IsRaidOfficer()) then
+			SetRaidTarget("targettarget",8)
+		end
+		TargetLastTarget()
 		if name == UnitName("player") then
 			self:WarningSign(icon.eyeBeamSelf, 2 - 0.1)
 			SendChatMessage("Eye Beam On Me !", "SAY")
