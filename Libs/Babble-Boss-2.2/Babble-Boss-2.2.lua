@@ -28,6 +28,20 @@ local BabbleBoss = AceLibrary("AceLocale-2.2"):new(MAJOR_VERSION)
 
 BabbleBoss:RegisterTranslations("enUS", function()
 	return {
+		["Sanctum Dragonkin"] = true,
+		["Sanctum Dreamer"] = true,
+		["Sanctum Supressor"] = true,
+		["Sanctum Wyrmkin"] = true,
+		["Sanctum Wyrm"] = true,
+		["Solnius"] = true,
+		["Erennius"] = true,
+		["Dark Rider Champion"] = true,
+		["Lord Blackwald II"] = true,
+		["Phantom Servant"] = true,
+		["Brood Queen Araxxna"] = true,
+		["Grizikil"] = true,
+		["Clawlord Howlfang"] = true,
+		["Moroes"] = true,
 		["Blackhand Incarcerator"] = true,
 		["Venom Stalker"] = true,
 		["Living Monstrosity"] = true,
@@ -1078,7 +1092,6 @@ BabbleBoss:RegisterTranslations("ruRU", function()
 		["Gargoyle"] = true,
 	}
 end)
-
 
 BabbleBoss:RegisterTranslations("deDE", function()
 	return {

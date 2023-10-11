@@ -6,6 +6,10 @@ local rend = AceLibrary("Babble-Boss-2.2")["Warchief Rend Blackhand"]
 module.revision = 30002
 module.enabletrigger = {gyth, rend}
 module.toggleoptions = {"flamebreath", "freeze", "dismount", -1, "whirlwind", "enrage", "bosskill"}
+module.zonename = {
+	AceLibrary("AceLocale-2.2"):new("BigWigs")["Blackrock Spire"],
+	AceLibrary("Babble-Zone-2.2")["Blackrock Spire"],
+}
 --module.zonename = {
 --	AceLibrary("AceLocale-2.2"):new("BigWigs")["Outdoor Raid Bosses Zone"],
 --	AceLibrary("Babble-Zone-2.2")["Blackrock Spire"],

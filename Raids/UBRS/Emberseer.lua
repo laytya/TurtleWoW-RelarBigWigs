@@ -6,6 +6,10 @@ local boss = AceLibrary("Babble-Boss-2.2")["Pyroguard Emberseer"]
 module.revision = 30002
 module.enabletrigger = {adds, boss}
 module.toggleoptions = {"firenova", "bosskill"}
+module.zonename = {
+	AceLibrary("AceLocale-2.2"):new("BigWigs")["Blackrock Spire"],
+	AceLibrary("Babble-Zone-2.2")["Blackrock Spire"],
+}
 
 L:RegisterTranslations("enUS", function() return {
 	cmd = "Emberseer",

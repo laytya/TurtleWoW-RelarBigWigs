@@ -3,6 +3,10 @@ local module, L = BigWigs:ModuleDeclaration("The Beast", "Blackrock Spire")
 module.revision = 30002
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"charge", "fear", "immolate", "flamebreak", "fireball", "bosskill"}
+module.zonename = {
+	AceLibrary("AceLocale-2.2"):new("BigWigs")["Blackrock Spire"],
+	AceLibrary("Babble-Zone-2.2")["Blackrock Spire"],
+}
 
 L:RegisterTranslations("enUS", function() return {
 	cmd = "Beast",

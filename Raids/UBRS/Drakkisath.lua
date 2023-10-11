@@ -3,6 +3,10 @@ local module, L = BigWigs:ModuleDeclaration("General Drakkisath", "Blackrock Spi
 module.revision = 30001
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"adds", "bosskill", "bigicon", "icon", -1, "conflagSelf", "conflagProxy", "flamestrike"}
+module.zonename = {
+	AceLibrary("AceLocale-2.2"):new("BigWigs")["Blackrock Spire"],
+	AceLibrary("Babble-Zone-2.2")["Blackrock Spire"],
+}
 
 --[[Testing stuff
 /script SendAddonMessage("BigWigs","DrakkisathAddDead", "RAID", "Relar");
@@ -99,9 +103,6 @@ function module:OnSetup()
 end
 
 function module:OnEngage()
-	if UnitName("target") == "General Drakkisath" and (IsRaidLeader() or IsRaidOfficer()) then
-		klhtm.net.sendmessage("target " .. "General Drakkisath")
-	end
 	addsDead = 0
 end
 

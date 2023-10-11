@@ -4,7 +4,10 @@ local module, L = BigWigs:ModuleDeclaration("Captain Kromcrush", "Dire Maul")
 module.revision = 30002
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"retaliation", "adds", "fear", "bosskill"}
-
+module.zonename = {
+	AceLibrary("AceLocale-2.2"):new("BigWigs")["Dire Maul"],
+	AceLibrary("Babble-Zone-2.2")["Dire Maul"],
+}
 
 L:RegisterTranslations("enUS", function() return {
 	cmd = "CaptainKromcrush",

@@ -8,7 +8,10 @@ local module, L = BigWigs:ModuleDeclaration("Onyxia", "Onyxia's Lair")
 module.revision = 20004 -- To be overridden by the module!
 module.enabletrigger = module.translatedName -- string or table {boss, add1, add2}
 module.toggleoptions = {"flamebreath", "deepbreath", "wingbuffet", "fireball", "phase", "onyfear", "bosskill"}
-
+module.zonename = {
+	AceLibrary("AceLocale-2.2"):new("BigWigs")["Onyxia's Lair"],
+	AceLibrary("Babble-Zone-2.2")["Onyxia's Lair"],
+}
 
 ---------------------------------
 --      Module specific Locals --

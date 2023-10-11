@@ -1,6 +1,6 @@
 ## Interface: 11200
 
-## Title: |cFFFF8080Relar|r Big Wigs |cff7fff7f30019|r |cffabd473Turtle-WoW|r
+## Title: |cFFFF8080Relar|r Big Wigs |cff7fff7f30020|r |cffabd473Turtle-WoW|r
 ## Title-zhCN: |cffabd473Turtle-WoW|r Big Wigs
 ## Notes: Boss Mods with Timer bars.
 ## Notes-esES: Módulos para Jefes con barras temporizadoras.
@@ -146,14 +146,14 @@ Raids\MC\Golemagg.lua
 Raids\MC\CoreHound.lua
 
 Raids\DireMaul\CaptainKromcrush.lua
+Raids\DireMaul\Gordok.lua
 
 Raids\Other\Azuregos.lua
-Raids\Other\Kazzak.lua
 Raids\Other\Emeriss.lua
 Raids\Other\Lethon.lua
 Raids\Other\Taerar.lua
 Raids\Other\Ysondre.lua
-Raids\Other\Gordok.lua
+Raids\Other\Kazzak.lua
 Raids\Other\Nerubian.lua
 
 Raids\Onyxia\Onyxia.lua
@@ -182,6 +182,22 @@ Raids\UBRS\Beast.lua
 Raids\UBRS\Drakkisath.lua
 Raids\UBRS\Emberseer.lua
 Raids\UBRS\Rend.lua
+
+Raids\EmeraldSanctum\Erennius.lua
+Raids\EmeraldSanctum\Solnius.lua
+Raids\EmeraldSanctum\SanctumDragonkin.lua
+Raids\EmeraldSanctum\SanctumDreamer.lua
+Raids\EmeraldSanctum\SanctumSupressor.lua
+Raids\EmeraldSanctum\SanctumWyrmkin.lua
+Raids\EmeraldSanctum\SanctumWyrm.lua
+
+Raids\Karazhan\LordBlackwaldII.lua
+Raids\Karazhan\BroodQueenAraxxna.lua
+Raids\Karazhan\Grizikil.lua
+Raids\Karazhan\ClawlordHowlfang.lua
+Raids\Karazhan\Moroes.lua
+Raids\Karazhan\PhantomServant.lua
+Raids\Karazhan\DarkRiderChampion.lua
 
 Battlegrounds\AlteracValley.lua
 Battlegrounds\ArathiBasin.lua

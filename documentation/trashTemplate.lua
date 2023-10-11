@@ -1,12 +1,13 @@
 
-local module, L = BigWigs:ModuleDeclaration("BOSS EXACT NAME", "Emerald Sanctum")
+local module, L = BigWigs:ModuleDeclaration("Exact Mob Name", "Emerald Sanctum")
 
 module.revision = 30020
 module.enabletrigger = module.translatedName
-module.toggleoptions = {"ability1", "ability2", "ability3", "bosskill"}
+module.toggleoptions = {"ability1", "ability2", "ability3"}
+module.trashMod = true
 
 L:RegisterTranslations("enUS", function() return {
-	cmd = "Bossname",
+	cmd = "Mobname",
 
 	ability1_cmd = "ability1",
 	ability1_name = "ability1 Alert",
@@ -19,7 +20,6 @@ L:RegisterTranslations("enUS", function() return {
 	ability3_cmd = "ability3",
 	ability3_name = "ability3 Alert",
 	ability3_desc = "Warns for ability3",
-	
 	
 	
 	
@@ -37,8 +37,13 @@ L:RegisterTranslations("enUS", function() return {
 	
 	trigger_person1 = "(.+) is afflicted by Living Bomb.",--CHAT_MSG_
 	
-	trigger_engage = "I kill you!",--CHAT_MSG_MONSTER_YELL
+	["You have slain %s!"] = true,
+	
 } end )
+
+module.defaultDB = {
+	bosskill = nil,
+}
 
 local timer = {
 	ability1 = 10,
@@ -60,8 +65,6 @@ local syncName = {
 	ability2 = "BossNameAbility2"..module.revision,
 	ability3 = "BossNameAbility3"..module.revision,
 }
-
-module:RegisterYellEngage(L["trigger_engage"])
 
 function module:OnEnable()
 	self:RegisterEvent("CHAT_MSG_", "Event")--trigger_ability1
@@ -96,6 +99,44 @@ function module:OnEngage()
 end
 
 function module:OnDisengage()
+end
+
+function module:CheckForBossDeath(msg)
+	if msg == string.format(UNITDIESOTHER, self:ToString())
+		or msg == string.format(L["You have slain %s!"], self.translatedName) then
+		local function IsBossInCombat()
+			local t = module.enabletrigger
+			if not t then return false end
+			if type(t) == "string" then t = {t} end
+
+			if UnitExists("target") and UnitAffectingCombat("target") then
+				local target = UnitName("target")
+				for _, mob in pairs(t) do
+					if target == mob then
+						return true
+					end
+				end
+			end
+
+			local num = GetNumRaidMembers()
+			for i = 1, num do
+				local raidUnit = string.format("raid%starget", i)
+				if UnitExists(raidUnit) and UnitAffectingCombat(raidUnit) then
+					local target = UnitName(raidUnit)
+					for _, mob in pairs(t) do
+						if target == mob then
+							return true
+						end
+					end
+				end
+			end
+			return false
+		end
+
+		if not IsBossInCombat() then
+			self:SendBossDeathSync()
+		end
+	end
 end
 
 function module:Event(msg)
