@@ -21,7 +21,8 @@ L:RegisterTranslations("enUS", function() return {
 	trigger_sleepFade = "Dreamstate fades from (.+).",--CHAT_MSG_SPELL_AURA_GONE_SELF // CHAT_MSG_SPELL_AURA_GONE_OTHER // CHAT_MSG_SPELL_AURA_GONE_PARTY
 	trigger_sleepOther = "(.+) is afflicted by Dreamstate.",--CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE // CHAT_MSG_SPELL_PERIODIC_PARTY_DAMAGE
 	
-	bar_dreamstate = " is Sleeping",
+	--bar_dreamstate = " is Sleeping",
+	bar_dreamstate = "People Sleeping",
 	
 	["You have slain %s!"] = true,
 	
@@ -42,7 +43,7 @@ local color = {
 }
 local syncName = {
 	sleepOn = "SanctumDreamerDreamstateOn"..module.revision,
-	sleepOff = "SanctumDreamerDreamstateOff"..module.revision,
+	--sleepOff = "SanctumDreamerDreamstateOff"..module.revision,
 }
 
 function module:OnEnable()
@@ -57,8 +58,8 @@ function module:OnEnable()
 	
 	
 	
-	self:ThrottleSync(0, syncName.sleepOn)
-	self:ThrottleSync(0, syncName.sleepOff)
+	self:ThrottleSync(3, syncName.sleepOn)
+	--self:ThrottleSync(0, syncName.sleepOff)
 end
 
 function module:OnSetup()
@@ -113,10 +114,10 @@ function module:Event(msg)
 	if msg == L["trigger_sleepYou"] then
 		self:Sync(syncName.sleepOn .. " " .. UnitName("Player"))
 	
-	elseif msg == L["trigger_sleepFade"] then
-		local _,_, sleepOffTarget, _ = string.find(msg, L["trigger_sleepFade"])
-		if sleepOffTarget == "you" then sleepOffTarget = UnitName("Player") end
-		self:Sync(syncName.sleepOff .. " " .. sleepOffTarget)
+	--elseif msg == L["trigger_sleepFade"] then
+	--	local _,_, sleepOffTarget, _ = string.find(msg, L["trigger_sleepFade"])
+	--	if sleepOffTarget == "you" then sleepOffTarget = UnitName("Player") end
+	--	self:Sync(syncName.sleepOff .. " " .. sleepOffTarget)
 	
 	elseif string.find(msg, L["trigger_sleepOther"]) then
 		local _,_, sleepOnTarget, _ = string.find(msg, L["trigger_sleepOther"])
@@ -128,16 +129,18 @@ end
 function module:BigWigs_RecvSync(sync, rest, nick)
 	if sync == syncName.sleepOn and rest and self.db.profile.dreamstate then
 		self:SleepOn(rest)
-	elseif sync == syncName.sleepOff and rest and self.db.profile.dreamstate then
-		self:SleepOff(rest)
+	--elseif sync == syncName.sleepOff and rest and self.db.profile.dreamstate then
+	--	self:SleepOff(rest)
 	end
 end
 
 
 function module:SleepOn(rest)
-	self:Bar(rest..L["bar_dreamstate"], timer.dreamstate, icon.dreamstate, true, color.dreamstate)
+	self:Bar(L["bar_dreamstate"], timer.dreamstate, icon.dreamstate, true, color.dreamstate)
+	--self:Bar(rest..L["bar_dreamstate"], timer.dreamstate, icon.dreamstate, true, color.dreamstate)
 end
 
 function module:SleepOff(rest)
-	self:RemoveBar(rest..L["bar_dreamstate"])
+	self:RemoveBar(L["bar_dreamstate"])
+	--self:RemoveBar(rest..L["bar_dreamstate"])
 end

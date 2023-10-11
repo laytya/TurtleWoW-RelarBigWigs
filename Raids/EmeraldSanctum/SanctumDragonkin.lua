@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Sanctum Dragonkin", "Emerald Sanctum")
 
-module.revision = 30020
+module.revision = 30021
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"reflect"}
 module.trashMod = true
@@ -47,7 +47,7 @@ local syncName = {
 function module:OnEnable()
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS", "Event")--trigger_reflect
 	
-	self:ThrottleSync(0, syncName.reflect)
+	self:ThrottleSync(1, syncName.reflect)
 end
 
 function module:OnSetup()

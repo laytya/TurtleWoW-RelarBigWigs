@@ -111,7 +111,7 @@ function module:Event(msg)
 	if msg == L["trigger_emeraldSupressionYou"] then
 		self:Sync(syncName.emeraldSupressionOn .. " " .. UnitName("Player"))
 	
-	elseif msg == L["trigger_emeraldSupressionFade"] then
+	elseif string.find(msg, L["trigger_emeraldSupressionFade"]) then
 		local _,_, supressionOffTarget, _ = string.find(msg, L["trigger_emeraldSupressionFade"])
 		if supressionOffTarget == "you" then supressionOffTarget = UnitName("Player") end
 		self:Sync(syncName.emeraldSupressionOff .. " " .. supressionOffTarget)

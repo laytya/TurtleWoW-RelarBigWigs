@@ -17,6 +17,7 @@ module.zonename = {
 --Dreamfever			Disease				Reduced Atk Spd			??sec
 --Emerald Instability	Magic				200 nature dmg taken	??sec
 --Sanctum Mind Decay	Magic				Mana Drain				??sec
+-->>>>>>>>>				-> Dispel 			-> 75% reduce cast time for 30sec
 
 L:RegisterTranslations("enUS", function() return {
 	cmd = "Solnius",
@@ -111,7 +112,7 @@ local syncName = {
 	--volley = "SolniusVolley"..module.revision,
 }
 
-module:RegisterYellEngage(L["trigger_engage"])
+--module:RegisterYellEngage(L["trigger_engage"])
 bwSolniusEngaged = false
 bwSolniusHardMode = false
 bwSolniusHardModeHardOn = false
@@ -119,13 +120,14 @@ bwSolniusHardModeHardOn = false
 function module:OnEnable()
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS", "Event")--trigger_solniusSleep
 	self:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_OTHER", "Event")--trigger_solniusSleepFade
-	self:RegisterEvent("CHAT_MSG_MONSTER_YELL", "Event")--trigger_hardMode
 	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_CREATURE_DAMAGE", "Event")--trigger_wailOfErennius, trigger_howlOfErenniusResist
 	
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE", "Event")--trigger_howlOfErennius, trigger_volley
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_PARTY_DAMAGE", "Event")--trigger_howlOfErennius, trigger_volley
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE", "Event")--trigger_howlOfErennius, trigger_volley
 	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_PARTY_DAMAGE", "Event")--trigger_howlOfErenniusResist
+	
+	self:RegisterEvent("CHAT_MSG_MONSTER_YELL")--trigger_hardMode
 	
 	self:ThrottleSync(10, syncName.hardMode)
 	self:ThrottleSync(10, syncName.hardModeOff)
@@ -182,10 +184,16 @@ function module:CHAT_MSG_COMBAT_HOSTILE_DEATH(msg)
 	end
 end
 
-function module:Event(msg)
-	if msg == L["trigger_hardMode"] and bwSolniusEngaged == true then
+function module:CHAT_MSG_MONSTER_YELL(msg, sender)
+	if msg == L["trigger_engage"] and sender == "Solnius" then
+		module:SendEngageSync()
+	elseif msg == L["trigger_hardMode"] and bwSolniusEngaged == true then
 		self:Sync(syncName.hardMode)
-	elseif msg == L["trigger_solniusSleep"] then
+	end
+end
+
+function module:Event(msg)
+	if msg == L["trigger_solniusSleep"] then
 		self:Sync(syncName.isSleeping)
 	elseif msg == L["trigger_solniusSleepFade"] then
 		self:Sync(syncName.isSleepingFade)

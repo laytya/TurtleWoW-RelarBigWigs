@@ -32,7 +32,7 @@ module.defaultDB = {
 }
 
 local timer = {
-	wyrmkinsVenom = 10,--tbd
+	wyrmkinsVenom = 30,--tbd
 }
 local icon = {
 	wyrmkinsVenom = "Ability_Creature_Poison_03",
@@ -54,8 +54,6 @@ function module:OnEnable()
 	
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE", "Event")--trigger_wyrmkinsVenomOther
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_PARTY_DAMAGE", "Event")--trigger_wyrmkinsVenomOther
-	
-	
 	
 	self:ThrottleSync(0, syncName.wyrmkinsVenomOn)
 	self:ThrottleSync(0, syncName.wyrmkinsVenomOff)
@@ -113,7 +111,7 @@ function module:Event(msg)
 	if msg == L["trigger_wyrmkinsVenomYou"] then
 		self:Sync(syncName.wyrmkinsVenomOn .. " " .. UnitName("Player"))
 	
-	elseif msg == L["trigger_wyrmkinsVenomFade"] then
+	elseif string.find(msg, L["trigger_wyrmkinsVenomFade"]) then
 		local _,_, wyrmkinsVenomOffTarget, _ = string.find(msg, L["trigger_wyrmkinsVenomFade"])
 		if wyrmkinsVenomOffTarget == "you" then wyrmkinsVenomOffTarget = UnitName("Player") end
 		self:Sync(syncName.wyrmkinsVenomOff .. " " .. wyrmkinsVenomOffTarget)

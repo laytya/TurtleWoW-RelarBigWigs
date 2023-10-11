@@ -42,7 +42,7 @@ local timer = {
 	wailOfErenniusCast = 6,
 	wailOfErenniusAfflicted = 3,
 	wailOfErenniusCd = 26,
-	howlOfErenniusCd = {25,38},--saw 33, saw 46, minus the 8 afflicted -> 25,38
+	howlOfErenniusCd = {22,38},--saw 30, saw 46, minus the 8 afflicted -> 25,38
 	howlOfErenniusAfflicted = 8,
 	volley = 12,
 }
@@ -122,6 +122,7 @@ function module:WailOfErenniusCast()
 end
 
 function module:HowlOfErennius()
+	self:RemoveBar(L["bar_howlOfErenniusCD"])
 	self:Bar(L["bar_howlOfErenniusAfflicted"], timer.howlOfErenniusAfflicted, icon.howlOfErennius, true, color.howlOfErennius)
 	self:DelayedIntervalBar(timer.howlOfErenniusAfflicted, L["bar_howlOfErenniusCD"], timer.howlOfErenniusCd[1], timer.howlOfErenniusCd[2], icon.howlOfErennius, true, color.howlOfErennius)
 end
