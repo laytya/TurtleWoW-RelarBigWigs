@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Clawlord Howlfang", "Karazhan")
 
-module.revision = 30020
+module.revision = 30022
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"terrifyingpresence", "curse", "enrage", "bosskill"}
 module.zonename = {
@@ -27,7 +27,7 @@ L:RegisterTranslations("enUS", function() return {
 	
 	
 	trigger_terrifyingPresenceSelf = "You are afflicted by Terrifying Presence %((.+)%).",--CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE
-	trigger_terrifyingPresence = "(.+) is afflicted by Terrifying Presence %((.+)%).",--CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE // CHAT_MSG_SPELL_PERIODIC_PARTY_DAMAGE
+	--trigger_terrifyingPresence = "(.+) is afflicted by Terrifying Presence %((.+)%).",--CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE // CHAT_MSG_SPELL_PERIODIC_PARTY_DAMAGE
 	bar_terrifyingPresence = "% reduced",
 
 	trigger_curse = "afflicted by Shadowbane Curse.",--CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE // CHAT_MSG_SPELL_PERIODIC_PARTY_DAMAGE // CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE
@@ -52,7 +52,7 @@ local color = {
 	curse = "Black",
 }
 local syncName = {
-	terrifyingPresence = "ClawlordHowlfangTerrifyingPresence"..module.revision,
+	terrifyingPresence2 = "ClawlordHowlfangTerrifyingPresence2"..module.revision,
 	curse = "ClawlordHowlfangCurse"..module.revision,
 	enrage = "ClawlordHowlfangEnrage"..module.revision,
 }
@@ -60,13 +60,14 @@ local syncName = {
 module:RegisterYellEngage(L["trigger_engage"])
 
 function module:OnEnable()
+	--self:RegisterEvent("CHAT_MSG_SAY", "Event")--Debug
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE", "Event")--trigger_terrifyingPresenceSelf, trigger_curse
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_PARTY_DAMAGE", "Event")--trigger_terrifyingPresence, trigger_curse
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE", "Event")--trigger_terrifyingPresence, trigger_curse
 	
 	self:RegisterEvent("CHAT_MSG_MONSTER_YELL", "Event")--trigger_yellEnrage
 	
-	self:ThrottleSync(0, syncName.terrifyingPresence)
+	self:ThrottleSync(2, syncName.terrifyingPresence2)
 	self:ThrottleSync(10, syncName.curse)
 	self:ThrottleSync(10, syncName.enrage)
 end
@@ -82,17 +83,15 @@ function module:OnDisengage()
 end
 
 function module:Event(msg)
-	if string.find(msg, L["trigger_terrifyingPresence"]) then
-		local _,_, tpPlayer, tpQty = string.find(msg, L["trigger_terrifyingPresence"])
-		local tpPlayerAndQty = tpPlayer .. " " .. tpQty
-		self:Sync(syncName.terrifyingPresence .. " " .. tpPlayerAndQty)
+	if string.find(msg, L["trigger_terrifyingPresenceSelf"]) then
+		local _,_, tpQty, _ = string.find(msg, L["trigger_terrifyingPresenceSelf"])
+		if UnitName("target") ~= nil and UnitName("targettarget") ~= nil then
+			if UnitName("target") == "Clawlord Howlfang" and UnitName("targettarget") == UnitName("Player") then
+				local tpPlayerAndQty = UnitName("Player") .. " " .. tpQty
+				self:Sync(syncName.terrifyingPresence2 .. " " .. tpPlayerAndQty)
+			end
+		end
 		
-	elseif string.find(msg, L["trigger_terrifyingPresenceSelf"]) then
-		local _,_, tpQty, _ = string.find(msg, L["trigger_terrifyingPresence"])
-		local tpPlayer = UnitName("Player")
-		local tpPlayerAndQty = tpPlayer .. " " .. tpQty
-		self:Sync(syncName.terrifyingPresence .. " " .. tpPlayerAndQty)
-	
 	elseif string.find(msg, L["trigger_curse"]) then
 		self:Sync(syncName.curse)
 	
@@ -104,7 +103,7 @@ end
 
 
 function module:BigWigs_RecvSync(sync, rest, nick)
-	if sync == syncName.terrifyingPresence and rest and self.db.profile.terrifyingpresence then
+	if sync == syncName.terrifyingPresence2 and rest and self.db.profile.terrifyingpresence then
 		self:TerrifyingPresence(rest)
 	elseif sync == syncName.curse and self.db.profile.curse then
 		self:Curse()
@@ -116,32 +115,14 @@ end
 
 function module:TerrifyingPresence(rest)
 
-local tpPlayer = strsub(rest,0,strfind(rest," ") - 1)
-local tpQty = tonumber(strsub(rest,strfind(rest," "),strlen(rest)))
-local currentReduction = tpQty * 5
-local previousQty = tpQty - 1
-local previousReduction = previousQty * 5
-
-	--if no tank, don't do anything
-	TargetByName("Clawlord Howlfang",true)
-	if UnitName("targettarget") == nil then
-		TargetLastTarget()
-		bwHowlfangPreviousTarget = nil
-		return
-	end
+	local tpPlayer = strsub(rest,0,strfind(rest," ") - 1)
+	local tpQty = tonumber(strsub(rest,strfind(rest," "),strlen(rest)))
+	local currentReduction = tpQty * 5
+	local previousQty = tpQty - 1
+	local previousReduction = previousQty * 5
 	
-	local currentTank = UnitName("targettarget")
-	TargetLastTarget()
-
-	--if current tank is same as previous tank, remove previous bar
-	if bwHowlfangPreviousTarget ~= nil then
-		if currentTank == tpPlayer and currentTank == bwHowlfangPreviousTarget then
-			self:RemoveBar(tpPlayer.." "..previousReduction..L["bar_terrifyingPresence"])
-		end
-	end
-	
+	self:RemoveBar(tpPlayer.." "..previousReduction..L["bar_terrifyingPresence"])
 	self:Bar(tpPlayer.." "..currentReduction..L["bar_terrifyingPresence"], timer.terrifyingPresence, icon.terrifyingPresence, true, color.terrifyingPresence)
-	bwHowlfangPreviousTarget = tpPlayer
 end
 
 function module:Curse()

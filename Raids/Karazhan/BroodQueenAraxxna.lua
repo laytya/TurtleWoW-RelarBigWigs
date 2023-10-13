@@ -44,7 +44,7 @@ L:RegisterTranslations("enUS", function() return {
 local timer = {
 	volley = 8,
 	leechingBite = 20,--unknown
-	eggHatch = 20,--unknown
+	eggHatch = 25,--unknown
 }
 local icon = {
 	volley = "Spell_Nature_InsectSwarm",

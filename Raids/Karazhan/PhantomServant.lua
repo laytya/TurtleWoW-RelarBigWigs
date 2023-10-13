@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Phantom Servant", "Karazhan")
 
-module.revision = 30020
+module.revision = 30022
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"phantomscream"}
 module.trashMod = true
@@ -19,10 +19,10 @@ L:RegisterTranslations("enUS", function() return {
 
 	trigger_phantomScreamYou = "You are afflicted by Phantom Scream.",--CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE
 	trigger_phantomScreamOther = "(.+) is afflicted by Phantom Scream.",--CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE // CHAT_MSG_SPELL_PERIODIC_PARTY_DAMAGE
-	trigger_phantomScreamFade = "Phantom Scream fades from (.+).",--CHAT_MSG_SPELL_AURA_GONE_SELF // CHAT_MSG_SPELL_AURA_GONE_PARTY // CHAT_MSG_SPELL_AURA_GONE_OTHER
+	--trigger_phantomScreamFade = "Phantom Scream fades from (.+).",--CHAT_MSG_SPELL_AURA_GONE_SELF // CHAT_MSG_SPELL_AURA_GONE_PARTY // CHAT_MSG_SPELL_AURA_GONE_OTHER
 	
 	bar_phantomScreamCd = "Phantom Scream CD",
-	bar_phantomScreamAfflicted = " Silenced",
+	--bar_phantomScreamAfflicted = " Silenced",
 
 	["You have slain %s!"] = true,
 } end )
@@ -42,21 +42,22 @@ local color = {
 	phantomScreamAfflicted = "Red",
 }
 local syncName = {
-	phantomScream = "PhantomServantPhantomScream"..module.revision,
-	phantomScreamFade = "PhantomServantPhantomScreamFade"..module.revision,
+	phantomScream2 = "PhantomServantPhantomScream2"..module.revision,
+	--phantomScreamFade = "PhantomServantPhantomScreamFade"..module.revision,
 }
 
 function module:OnEnable()
+	--self:RegisterEvent("CHAT_MSG_SAY", "Event")--Debug
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE", "Event")--trigger_phantomScreamYou
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE", "Event")--trigger_phantomScreamOther
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_PARTY_DAMAGE", "Event")--trigger_phantomScreamOther
 	
-	self:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_SELF", "Event")--trigger_phantomScreamFade
-	self:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_PARTY", "Event")--trigger_phantomScreamFade
-	self:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_OTHER", "Event")--trigger_phantomScreamFade
+	--self:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_SELF", "Event")--trigger_phantomScreamFade
+	--self:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_PARTY", "Event")--trigger_phantomScreamFade
+	--self:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_OTHER", "Event")--trigger_phantomScreamFade
 	
-	self:ThrottleSync(0, syncName.phantomScream)
-	self:ThrottleSync(0, syncName.phantomScreamFade)
+	self:ThrottleSync(5, syncName.phantomScream2)
+	--self:ThrottleSync(0, syncName.phantomScreamFade)
 end
 
 function module:OnSetup()
@@ -109,31 +110,31 @@ end
 
 function module:Event(msg)
 	if msg == L["trigger_phantomScreamYou"] then
-		self:Sync(syncName.phantomScream .. " " .. UnitName("Player"))
+		self:Sync(syncName.phantomScream2)-- .. " " .. UnitName("Player"))
 		
 	elseif string.find(msg, L["trigger_phantomScreamOther"]) then
 		local _,_, phantomScreamTarget, _ = string.find(msg, L["trigger_phantomScreamOther"])
-		self:Sync(syncName.phantomScream .. " " .. phantomScreamTarget)
+		self:Sync(syncName.phantomScream2)-- .. " " .. phantomScreamTarget)
 		
-	elseif string.find(msg, L["trigger_phantomScreamFade"]) then
-		local _,_, phantomScreamFadeTarget, _ = string.find(msg, L["trigger_phantomScreamFade"])
-		if phantomScreamFadeTarget == "you" then phantomScreamFadeTarget = UnitName("Player") end
-		self:Sync(syncName.phantomScreamFade .. " " .. phantomScreamFadeTarget)
+	--elseif string.find(msg, L["trigger_phantomScreamFade"]) then
+	--	local _,_, phantomScreamFadeTarget, _ = string.find(msg, L["trigger_phantomScreamFade"])
+	--	if phantomScreamFadeTarget == "you" then phantomScreamFadeTarget = UnitName("Player") end
+	--	self:Sync(syncName.phantomScreamFade .. " " .. phantomScreamFadeTarget)
 	end
 end
 
 
 function module:BigWigs_RecvSync(sync, rest, nick)
-	if sync == syncName.phantomScream and rest and self.db.profile.phantomscream then
-		self:PhantomScream(rest)
-	elseif sync == syncName.phantomScreamFade and rest and self.db.profile.phantomscream then
-		self:PhantomScreamFade(rest)
+	if sync == syncName.phantomScream2 and self.db.profile.phantomscream then
+		self:PhantomScream()
+	--elseif sync == syncName.phantomScreamFade and rest and self.db.profile.phantomscream then
+	--	self:PhantomScreamFade(rest)
 	end
 end
 
 
-function module:PhantomScream(rest)
-	self:Bar(rest..L["bar_phantomScreamAfflicted"], timer.phantomScream, icon.phantomScream, true, color.phantomScreamAfflicted)
+function module:PhantomScream()
+	--self:Bar(rest..L["bar_phantomScreamAfflicted"], timer.phantomScream, icon.phantomScream, true, color.phantomScreamAfflicted)
 	self:Bar(L["bar_phantomScreamCd"], timer.phantomScream, icon.phantomScream, true, color.phantomScreamCd)
 end
 

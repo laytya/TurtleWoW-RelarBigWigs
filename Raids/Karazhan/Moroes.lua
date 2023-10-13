@@ -1,9 +1,9 @@
 
 local module, L = BigWigs:ModuleDeclaration("Moroes", "Karazhan")
 
-module.revision = 30020
+module.revision = 30022
 module.enabletrigger = module.translatedName
-module.toggleoptions = {"smokebomb", "reflect", "agonizingconcussion", "shufflekick", "curse", "bosskill"}
+module.toggleoptions = {"smokebomb", "reflect", "shufflekick", "curse", "dust", "bosskill"}
 module.zonename = {
 	AceLibrary("AceLocale-2.2"):new("BigWigs")["Karazhan"],
 	AceLibrary("Babble-Zone-2.2")["Karazhan"],
@@ -20,9 +20,9 @@ L:RegisterTranslations("enUS", function() return {
 	reflect_name = "Spell Reflect Alert",
 	reflect_desc = "Warn for Spell Reflect",
 	
-	agonizingconcussion_cmd = "agonizingconcussion",
-	agonizingconcussion_name = "Agonizing Concussion Alert",
-	agonizingconcussion_desc = "Warn for Agonizing Concussion",
+	--agonizingconcussion_cmd = "agonizingconcussion",
+	--agonizingconcussion_name = "Agonizing Concussion Alert",
+	--agonizingconcussion_desc = "Warn for Agonizing Concussion",
 	
 	shufflekick_cmd = "shufflekick",
 	shufflekick_name = "Shuffle Kick Alert",
@@ -31,6 +31,10 @@ L:RegisterTranslations("enUS", function() return {
 	curse_cmd = "curse",
 	curse_name = "Curse Alert",
 	curse_desc = "Warns for Curse",
+	
+	dust_cmd = "dust",
+	dust_name = "Glittering Dust Alert",
+	dust_desc = "Warns for Glittering Dust",
 	
 	
 	
@@ -44,25 +48,30 @@ L:RegisterTranslations("enUS", function() return {
 	trigger_smokeBombYou = "You are afflicted by Smoke Bomb.",--CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE
 	trigger_smokeBombOther = "(.+) is afflicted by Smoke Bomb.",--CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE // CHAT_MSG_SPELL_PERIODIC_PARTY_DAMAGE
 	trigger_smokeBombFade = "Smoke Bomb fades from (.+).",--CHAT_MSG_SPELL_AURA_GONE_OTHER // CHAT_MSG_SPELL_AURA_GONE_PARTY // CHAT_MSG_SPELL_AURA_GONE_SELF
-	bar_smokeBomb = " Smoke Bomb",
+	bar_smokeBomb = "Players Smoke Bombed",
 	
 	trigger_reflect = "Moroes gains Reflection.",--CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS
 	trigger_reflectFade = "Reflection fades from Moroes.",--CHAT_MSG_SPELL_AURA_GONE_OTHER
 	bar_reflect = "Spell Reflect!",
 	msg_reflect = "Spell Reflect!",
 	
-	trigger_agonizingConcussionYou = "You are afflicted by Agonizing Concussion.",--CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE
-	trigger_agonizingConcussion = "(.+) is afflicted by Agonizing Concussion.",--CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE // CHAT_MSG_SPELL_PERIODIC_PARTY_DAMAGE
-	trigger_agonizingConcussionFade = "Agonizing Concussion fades from (.+).",--CHAT_MSG_SPELL_AURA_GONE_OTHER // CHAT_MSG_SPELL_AURA_GONE_PARTY // CHAT_MSG_SPELL_AURA_GONE_SELF
-	bar_agonizingConcussion = " Concussion",
+	--trigger_agonizingConcussionYou = "You are afflicted by Agonizing Concussion.",--CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE
+	--trigger_agonizingConcussion = "(.+) is afflicted by Agonizing Concussion.",--CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE // CHAT_MSG_SPELL_PERIODIC_PARTY_DAMAGE
+	--trigger_agonizingConcussionFade = "Agonizing Concussion fades from (.+).",--CHAT_MSG_SPELL_AURA_GONE_OTHER // CHAT_MSG_SPELL_AURA_GONE_PARTY // CHAT_MSG_SPELL_AURA_GONE_SELF
+	--bar_agonizingConcussion = " Concussion",
 	
 	trigger_shuffleKickYou = "You are afflicted by Shuffle Kick.",--CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE
 	trigger_shuffleKick = "(.+) is afflicted by Shuffle Kick.",--CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE // CHAT_MSG_SPELL_PERIODIC_PARTY_DAMAGE
 	trigger_shuffleKickFade = "Shuffle Kick fades from (.+).",--CHAT_MSG_SPELL_AURA_GONE_OTHER // CHAT_MSG_SPELL_AURA_GONE_PARTY // CHAT_MSG_SPELL_AURA_GONE_SELF
-	bar_shuffleKick = " Kicked",	
+	bar_shuffleKick = " Kicked",
 	
 	trigger_curse = "afflicted by Moroes Curse.",--CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE // CHAT_MSG_SPELL_PERIODIC_PARTY_DAMAGE // CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE
 	msg_curse = "Moroes Curse, Decurse!",
+	
+	trigger_dustYou = "You are afflicted by Glittering Dust.",--CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE
+	trigger_dust = "(.+) is afflicted by Glittering Dust.",--CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE // CHAT_MSG_SPELL_PERIODIC_PARTY_DAMAGE
+	trigger_dustFade = "Glittering Dust fades from (.+).",--CHAT_MSG_SPELL_AURA_GONE_OTHER // CHAT_MSG_SPELL_AURA_GONE_PARTY // CHAT_MSG_SPELL_AURA_GONE_SELF
+	bar_dust = " Dusted",
 	
 	trigger_yellSmt = "Most impressive, it would appear your skills do match your bravery.",-- CHAT_MSG_MONSTER_YELL
 } end )
@@ -72,44 +81,50 @@ local timer = {
 	p2 = 7,
 	smokeBomb = 10,
 	reflect = 5,
-	agonizingConcussion = 30,--sometimes 30, 41, 44???
+	--agonizingConcussion = 30,--sometimes 30, 41, 44???
 	shuffleKick = 4,
+	dust = 10,
 }
 local icon = {
 	p1 = "Inv_Misc_Pocketwatch_01",
 	p2 = "Inv_Misc_Pocketwatch_01",
 	smokeBomb = "Ability_Vanish",
 	reflect = "Spell_Arcane_Blink",
-	agonizingConcussion = "Spell_Shadow_MindSteal",
+	--agonizingConcussion = "Spell_Shadow_MindSteal",
 	shuffleKick = "Ability_Kick",
 	curse = "Spell_Shadow_GatherShadows",
+	dust = "inv_misc_dust_02",--unknown
 }
 local color = {
 	p1 = "White",
 	p2 = "White",
 	smokeBomb = "Black",
 	reflect = "Red",
-	agonizingConcussion = "Green",
+	--agonizingConcussion = "Green",
 	shuffleKick = "Blue",
+	dust = "Cyan",
 }
 local syncName = {
 	p1 = "MoroesP1"..module.revision,
-	smokeBomb = "MoroesSmokeBomb"..module.revision,
-	smokeBombFade = "MoroesSmokeBombFade"..module.revision,
+	smokeBomb2 = "MoroesSmokeBomb2"..module.revision,
+	--smokeBombFade = "MoroesSmokeBombFade"..module.revision,
 	reflect = "MoroesReflect"..module.revision,
 	reflectFade = "MoroesReflectFade"..module.revision,
 	p1End = "MoroesP1End"..module.revision,
 	p2 = "MoroesP2"..module.revision,
-	agonizingConcussion = "MoroesAgonizingConcussion"..module.revision,
-	agonizingConcussionFade = "MoroesAgonizingConcussionFade"..module.revision,
+	--agonizingConcussion = "MoroesAgonizingConcussion"..module.revision,
+	--agonizingConcussionFade = "MoroesAgonizingConcussionFade"..module.revision,
 	shuffleKick = "MoroesShuffleKick"..module.revision,
 	shuffleKickFade = "MoroesShuffleKickFade"..module.revision,
 	curse = "MoroesCurse"..module.revision,
+	dust = "MoroesDust"..module.revision,
+	dustFade = "MoroesDustFade"..module.revision,
 }
 
 local bwMoroesPhase = nil
 
 function module:OnEnable()
+	--self:RegisterEvent("CHAT_MSG_SAY", "Event")--Debug
 	bwMoroesPhase = nil
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE", "Event")--trigger_smokeBombYou, trigger_agonizingConcussionYou, trigger_curse
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE", "Event")--trigger_smokeBombOther, trigger_agonizingConcussion, trigger_curse
@@ -126,14 +141,16 @@ function module:OnEnable()
 	self:ThrottleSync(10, syncName.p1)
 	self:ThrottleSync(10, syncName.p1End)
 	self:ThrottleSync(10, syncName.p2)
-	self:ThrottleSync(0, syncName.smokeBomb)
+	self:ThrottleSync(3, syncName.smokeBomb2)
 	self:ThrottleSync(5, syncName.reflect)
 	self:ThrottleSync(5, syncName.reflectFade)
-	self:ThrottleSync(5, syncName.agonizingConcussion)
-	self:ThrottleSync(5, syncName.agonizingConcussionFade)
+	--self:ThrottleSync(5, syncName.agonizingConcussion)
+	--self:ThrottleSync(5, syncName.agonizingConcussionFade)
 	self:ThrottleSync(5, syncName.shuffleKick)
 	self:ThrottleSync(5, syncName.shuffleKickFade)
 	self:ThrottleSync(5, syncName.curse)
+	self:ThrottleSync(5, syncName.dust)
+	self:ThrottleSync(5, syncName.dustFade)
 end
 
 function module:OnSetup()
@@ -146,27 +163,31 @@ end
 function module:OnDisengage()
 end
 
-function module:Event(msg)
+function module:CHAT_MSG_MONSTER_YELL(msg, sender)
 	if msg == L["trigger_p1"] then
+		module:SendEngageSync()
 		self:Sync(syncName.p1)
-	
+		
 	elseif msg == L["trigger_p1End"] then
 		self:Sync(syncName.p1End)
-	
+		
 	elseif msg == L["trigger_p2"] then
 		self:Sync(syncName.p2)
-	
-	elseif msg == L["trigger_smokeBombYou"] then
-		self:Sync(syncName.smokeBomb .. " " .. UnitName("Player"))
+	end
+end
+
+function module:Event(msg)
+	if msg == L["trigger_smokeBombYou"] then
+		self:Sync(syncName.smokeBomb2)-- .. " " .. UnitName("Player"))
 	
 	elseif string.find(msg, L["trigger_smokeBombOther"]) then
 		local _,_, smokeBombPlayer, _ = string.find(msg, L["trigger_smokeBombOther"])
-		self:Sync(syncName.smokeBomb .. " " .. smokeBombPlayer)
+		self:Sync(syncName.smokeBomb2)-- .. " " .. smokeBombPlayer)
 		
-	elseif string.find(msg, L["trigger_smokeBombFade"]) then
-		local _,_, smokeBombFadePlayer, _ = string.find(msg, L["trigger_smokeBombFade"])
-		if smokeBombFadePlayer == "you" then smokeBombFadePlayer = UnitName("Player") end
-		self:Sync(syncName.smokeBombFade .. " " .. smokeBombFadePlayer)
+	--elseif string.find(msg, L["trigger_smokeBombFade"]) then
+	--	local _,_, smokeBombFadePlayer, _ = string.find(msg, L["trigger_smokeBombFade"])
+	--	if smokeBombFadePlayer == "you" then smokeBombFadePlayer = UnitName("Player") end
+	--	self:Sync(syncName.smokeBombFade .. " " .. smokeBombFadePlayer)
 		
 		
 	elseif msg == L["trigger_reflect"] then
@@ -175,17 +196,17 @@ function module:Event(msg)
 		self:Sync(syncName.reflectFade)
 		
 		
-	elseif msg == L["trigger_agonizingConcussionYou"] then
-		self:Sync(syncName.agonizingConcussion .. " " .. UnitName("Player"))
+	--elseif msg == L["trigger_agonizingConcussionYou"] then
+	--	self:Sync(syncName.agonizingConcussion .. " " .. UnitName("Player"))
 	
-	elseif string.find(msg, L["trigger_agonizingConcussion"]) then
-		local _,_, agonizingConcussionPlayer, _ = string.find(msg, L["trigger_agonizingConcussion"])
-		self:Sync(syncName.agonizingConcussion .. " " .. agonizingConcussionPlayer)
+	--elseif string.find(msg, L["trigger_agonizingConcussion"]) then
+	--	local _,_, agonizingConcussionPlayer, _ = string.find(msg, L["trigger_agonizingConcussion"])
+	--	self:Sync(syncName.agonizingConcussion .. " " .. agonizingConcussionPlayer)
 		
-	elseif string.find(msg, L["trigger_agonizingConcussionFade"]) then
-		local _,_, agonizingConcussionFadePlayer, _ = string.find(msg, L["trigger_agonizingConcussionFade"])
-		if agonizingConcussionFadePlayer == "you" then agonizingConcussionFadePlayer = UnitName("Player") end
-		self:Sync(syncName.agonizingConcussionFade .. " " .. agonizingConcussionFadePlayer)
+	--elseif string.find(msg, L["trigger_agonizingConcussionFade"]) then
+	--	local _,_, agonizingConcussionFadePlayer, _ = string.find(msg, L["trigger_agonizingConcussionFade"])
+	--	if agonizingConcussionFadePlayer == "you" then agonizingConcussionFadePlayer = UnitName("Player") end
+	--	self:Sync(syncName.agonizingConcussionFade .. " " .. agonizingConcussionFadePlayer)
 		
 		
 		
@@ -204,6 +225,20 @@ function module:Event(msg)
 		
 	elseif string.find(msg, L["trigger_curse"]) then
 		self:Sync(syncName.curse)
+		
+		
+	elseif msg == L["trigger_dustYou"] then
+		self:Sync(syncName.dust .. " " .. UnitName("Player"))
+	
+	elseif string.find(msg, L["trigger_dust"]) then
+		local _,_, dustPlayer, _ = string.find(msg, L["trigger_dust"])
+		self:Sync(syncName.dust .. " " .. dustPlayer)
+		
+	elseif string.find(msg, L["trigger_dustFade"]) then
+		local _,_, dustFadePlayer, _ = string.find(msg, L["trigger_dustFade"])
+		if dustFadePlayer == "you" then dustFadePlayer = UnitName("Player") end
+		self:Sync(syncName.dustFade .. " " .. dustFadePlayer)
+		
 	end
 end
 
@@ -215,24 +250,28 @@ function module:BigWigs_RecvSync(sync, rest, nick)
 		self:P1End()
 	elseif sync == syncName.p2 then
 		self:P2()
-	elseif sync == syncName.smokeBomb and rest and self.db.profile.smokebomb then
-		self:SmokeBomb(rest)
-	elseif sync == syncName.smokeBombFade and rest and self.db.profile.smokebomb then
-		self:SmokeBombFade(rest)
+	elseif sync == syncName.smokeBomb2 and self.db.profile.smokebomb then
+		self:SmokeBomb()
+	--elseif sync == syncName.smokeBombFade and rest and self.db.profile.smokebomb then
+	--	self:SmokeBombFade(rest)
 	elseif sync == syncName.reflect and self.db.profile.reflect then
 		self:Reflect()
 	elseif sync == syncName.reflectFade and self.db.profile.reflect then
 		self:ReflectFade()
-	elseif sync == syncName.agonizingConcussion and rest and self.db.profile.agonizingconcussion then
-		self:AgonizingConcussion(rest)
-	elseif sync == syncName.agonizingConcussionFade and rest and self.db.profile.agonizingconcussion then
-		self:AgonizingConcussionFade(rest)
+	--elseif sync == syncName.agonizingConcussion and rest and self.db.profile.agonizingconcussion then
+	--	self:AgonizingConcussion(rest)
+	--elseif sync == syncName.agonizingConcussionFade and rest and self.db.profile.agonizingconcussion then
+	--	self:AgonizingConcussionFade(rest)
 	elseif sync == syncName.shuffleKick and rest and self.db.profile.shufflekick then
 		self:ShuffleKick(rest)
 	elseif sync == syncName.shuffleKickFade and rest and self.db.profile.shufflekick then
 		self:ShuffleKickFade(rest)
 	elseif sync == syncName.curse and self.db.profile.curse then
 		self:Curse()
+	elseif sync == syncName.dust and rest and self.db.profile.dust then
+		self:Dust(rest)
+	elseif sync == syncName.dustFade and rest and self.db.profile.dust then
+		self:DustFade(rest)
 	end
 end
 
@@ -251,8 +290,8 @@ function module:P2()
 	self:Bar(L["bar_p2"], timer.p2, icon.p2, true, color.p2)
 end
 
-function module:SmokeBomb(rest)
-	self:Bar(rest..L["bar_smokeBomb"], timer.smokeBomb, icon.smokeBomb, true, color.smokeBomb)
+function module:SmokeBomb()
+	self:Bar(L["bar_smokeBomb"], timer.smokeBomb, icon.smokeBomb, true, color.smokeBomb)
 	
 	if UnitClass("Player") == "Priest" then
 		self:WarningSign(icon.smokeBomb, 0.7)
@@ -261,9 +300,9 @@ function module:SmokeBomb(rest)
 	end
 end
 
-function module:SmokeBombFade(rest)
-	self:RemoveBar(rest..L["bar_smokeBomb"])
-end
+--function module:SmokeBombFade(rest)
+--	self:RemoveBar(rest..L["bar_smokeBomb"])
+--end
 
 function module:Reflect()
 	self:Bar(L["bar_reflect"], timer.reflect, icon.reflect, true, color.reflect)
@@ -284,13 +323,13 @@ function module:ReflectFade()
 	self:RemoveBar(L["bar_reflect"])
 end
 
-function module:AgonizingConcussion(rest)
-	self:Bar(rest..L["bar_agonizingConcussion"], timer.agonizingConcussion, icon.agonizingConcussion, true, color.agonizingConcussion)
-end
+--function module:AgonizingConcussion(rest)
+--	self:Bar(rest..L["bar_agonizingConcussion"], timer.agonizingConcussion, icon.agonizingConcussion, true, color.agonizingConcussion)
+--end
 
-function module:AgonizingConcussionFade(rest)
-	self:RemoveBar(rest..L["bar_agonizingConcussion"])
-end
+--function module:AgonizingConcussionFade(rest)
+--	self:RemoveBar(rest..L["bar_agonizingConcussion"])
+--end
 
 function module:ShuffleKick(rest)
 	self:Bar(rest..L["bar_shuffleKick"], timer.shuffleKick, icon.shuffleKick, true, color.shuffleKick)
@@ -308,4 +347,12 @@ function module:Curse()
 	elseif UnitClass("Player") == "Druid" then
 		self:WarningSign(icon.curse, 0.7)
 	end
+end
+
+function module:Dust(rest)
+	self:Bar(rest..L["bar_dust"], timer.dust, icon.dust, true, color.dust)
+end
+
+function module:DustFade(rest)
+	self:RemoveBar(rest..L["bar_dust"])
 end

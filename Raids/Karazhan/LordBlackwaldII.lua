@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Lord Blackwald II", "Karazhan")
 
-module.revision = 30020
+module.revision = 30022
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"reaverstorm", "boon", "empoweredsoul", "summon", "bosskill"}
 module.zonename = {
@@ -34,8 +34,8 @@ L:RegisterTranslations("enUS", function() return {
 	bar_reaverstormCd = "Reaver Storm CD",
 	bar_reaverstormCast = "Reaver Storm Cast",
 	
-	trigger_boonYou = "You are afflicted by Blackwalds Boon",--CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE
-	trigger_boonOther = "(.+) is afflicted by Blackwalds Boon",--CHAT_MSG_SPELL_PERIODIC_PARTY_DAMAGE // CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE
+	trigger_boonYou = "You are afflicted by Blackwalds Boon.",--CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE
+	trigger_boonOther = "(.+) is afflicted by Blackwalds Boon.",--CHAT_MSG_SPELL_PERIODIC_PARTY_DAMAGE // CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE
 	trigger_boonFade = "Blackwalds Boon fades from (.+).",--CHAT_MSG_SPELL_AURA_GONE_SELF // CHAT_MSG_SPELL_AURA_GONE_PARTY // CHAT_MSG_SPELL_AURA_GONE_OTHER
 	bar_boon = "Boon on ",
 	
@@ -44,6 +44,7 @@ L:RegisterTranslations("enUS", function() return {
 	bar_empoweredSoul = " Empowered",
 
 	trigger_yellSummon = "I call upon the Scythe of Elune, grant me your power!",--CHAT_MSG_MONSTER_YELL
+	bar_summon = "Summons add",
 	msg_yellSummon = "Shadowbane Ragefang Summonned!",
 	
 	trigger_engage = "You dare disturb the Dark Rider Lord?",--CHAT_MSG_MONSTER_YELL
@@ -54,17 +55,20 @@ local timer = {
 	reaverstormCast = 1.5,
 	boon = 15,--timer TBD
 	empoweredSoul = 10,
+	summon = 30,
 }
 local icon = {
 	reaverstorm = "Ability_Whirlwind",
 	boon = "Spell_Shadow_ChillTouch",
 	empoweredSoul = "Spell_Shadow_Haunting",
+	summon = "inv_misc_bone_orcskull_01",
 }
 local color = {
 	reaverstormCd = "White",
 	reaverstormCast = "Red",
 	boon = "Blue",
 	empoweredSoul = "Black",
+	summon = "Cyan"
 }
 local syncName = {
 	reaverstorm = "LordBlackwaldIIReaverstorm"..module.revision,
@@ -74,9 +78,10 @@ local syncName = {
 	summon = "LordBlackwaldIISummon"..module.revision,
 }
 
-module:RegisterYellEngage(L["trigger_engage"])
+--module:RegisterYellEngage(L["trigger_engage"])
 
 function module:OnEnable()
+	--self:RegisterEvent("CHAT_MSG_SAY", "Event")--Debug
 	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_CREATURE_DAMAGE", "Event")--trigger_reaverstorm
 	
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE", "Event")--trigger_boonYou, trigger_empoweredSoulYou
@@ -85,7 +90,8 @@ function module:OnEnable()
 	self:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_SELF", "Event")--trigger_boonFade
 	self:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_PARTY", "Event")--trigger_boonFade
 	self:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_OTHER", "Event")--trigger_boonFade
-	self:RegisterEvent("CHAT_MSG_MONSTER_YELL", "Event")--trigger_yellSummon
+	
+	self:RegisterEvent("CHAT_MSG_MONSTER_YELL")--trigger_yellSummon
 	
 	self:ThrottleSync(5, syncName.reaverstorm)
 	self:ThrottleSync(5, syncName.boon)
@@ -99,9 +105,19 @@ function module:OnSetup()
 end
 
 function module:OnEngage()
+	self:Bar(L["bar_summon"], timer.summon, icon.summon, true, color.summon)
 end
 
 function module:OnDisengage()
+end
+
+function module:CHAT_MSG_MONSTER_YELL(msg, sender)
+	if msg == L["trigger_engage"] then
+		module:SendEngageSync()
+	
+	elseif msg == L["trigger_yellSummon"] then
+		self:Sync(syncName.summon)
+	end
 end
 
 function module:Event(msg)
@@ -129,8 +145,9 @@ function module:Event(msg)
 		local _,_, empoweredSoulPlayer, _ = string.find(msg, L["trigger_empoweredSoulOther"])
 		self:Sync(syncName.empoweredSoul .. " " .. empoweredSoulPlayer)
 		
-	elseif msg == L["trigger_yellSummon"] then
-		self:Sync(syncName.summon)
+	--elseif msg == L["trigger_yellSummon"] then
+	--	self:Sync(syncName.summon)
+		
 	end
 end
 
@@ -183,4 +200,5 @@ end
 
 function module:Summon()
 	self:Message(L["msg_yellSummon"], "Urgent", false, nil, false)
+	self:Bar(L["bar_summon"], timer.summon, icon.summon, true, color.summon)
 end
