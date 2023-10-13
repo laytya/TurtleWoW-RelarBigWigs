@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Moroes", "Karazhan")
 
-module.revision = 30022
+module.revision = 30023
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"smokebomb", "reflect", "shufflekick", "curse", "dust", "bosskill"}
 module.zonename = {
@@ -136,7 +136,7 @@ function module:OnEnable()
 	
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS", "Event")--trigger_reflect
 	
-	self:RegisterEvent("CHAT_MSG_MONSTER_YELL", "Event")--trigger_p1, trigger_p2
+	self:RegisterEvent("CHAT_MSG_MONSTER_YELL")--trigger_p1, trigger_p2
 	
 	self:ThrottleSync(10, syncName.p1)
 	self:ThrottleSync(10, syncName.p1End)
@@ -172,6 +172,7 @@ function module:CHAT_MSG_MONSTER_YELL(msg, sender)
 		self:Sync(syncName.p1End)
 		
 	elseif msg == L["trigger_p2"] then
+		module:SendEngageSync()
 		self:Sync(syncName.p2)
 	end
 end

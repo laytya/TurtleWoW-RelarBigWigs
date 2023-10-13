@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Clawlord Howlfang", "Karazhan")
 
-module.revision = 30022
+module.revision = 30023
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"terrifyingpresence", "curse", "enrage", "bosskill"}
 module.zonename = {
@@ -57,7 +57,7 @@ local syncName = {
 	enrage = "ClawlordHowlfangEnrage"..module.revision,
 }
 
-module:RegisterYellEngage(L["trigger_engage"])
+--module:RegisterYellEngage(L["trigger_engage"])
 
 function module:OnEnable()
 	--self:RegisterEvent("CHAT_MSG_SAY", "Event")--Debug
@@ -65,7 +65,7 @@ function module:OnEnable()
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_PARTY_DAMAGE", "Event")--trigger_terrifyingPresence, trigger_curse
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE", "Event")--trigger_terrifyingPresence, trigger_curse
 	
-	self:RegisterEvent("CHAT_MSG_MONSTER_YELL", "Event")--trigger_yellEnrage
+	self:RegisterEvent("CHAT_MSG_MONSTER_YELL")--trigger_engage, trigger_yellEnrage
 	
 	self:ThrottleSync(2, syncName.terrifyingPresence2)
 	self:ThrottleSync(10, syncName.curse)
@@ -82,6 +82,15 @@ end
 function module:OnDisengage()
 end
 
+function module:CHAT_MSG_MONSTER_YELL(msg, sender)
+	if msg == L["trigger_engage"] then
+		module:SendEngageSync()
+		
+	elseif string.find(msg, L["trigger_yellEnrage"]) then
+		self:Sync(syncName.enrage)
+	end
+end
+
 function module:Event(msg)
 	if string.find(msg, L["trigger_terrifyingPresenceSelf"]) then
 		local _,_, tpQty, _ = string.find(msg, L["trigger_terrifyingPresenceSelf"])
@@ -94,10 +103,7 @@ function module:Event(msg)
 		
 	elseif string.find(msg, L["trigger_curse"]) then
 		self:Sync(syncName.curse)
-	
-	elseif string.find(msg, L["trigger_yellEnrage"]) then
-		self:Sync(syncName.enrage)
-		
+
 	end
 end
 

@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Brood Queen Araxxna", "Karazhan")
 
-module.revision = 30020
+module.revision = 30023
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"volley", "leechingbite", "egg", "bosskill"}
 module.zonename = {
@@ -26,7 +26,7 @@ L:RegisterTranslations("enUS", function() return {
 	
 	
 	
-	trigger_volley = "Brood Queen Araxxna begins to perform Brood Venom Volley.",--CHAT_MSG_SPELL_CREATURE_VS_CREATURE_DAMAGE
+	trigger_volley = "Brood Queen Araxxna's Brood Venom Volley hits",--CHAT_MSG_SPELL_CREATURE_VS_CREATURE_DAMAGE // CHAT_MSG_SPELL_CREATURE_VS_PARTY_DAMAGE // CHAT_MSG_SPELL_CREATURE_VS_SELF_DAMAGE
 	bar_volley = "Brood Venom Volley",
 	
 	trigger_leechingBiteYou = "You are afflicted by Leeching Bite.",--CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE
@@ -43,8 +43,8 @@ L:RegisterTranslations("enUS", function() return {
 
 local timer = {
 	volley = 8,
-	leechingBite = 20,--unknown
-	eggHatch = 25,--unknown
+	leechingBite = 10,
+	eggHatch = 20,
 }
 local icon = {
 	volley = "Spell_Nature_InsectSwarm",
@@ -63,7 +63,7 @@ local syncName = {
 	eggSpawn = "BroodQueenAraxxnaEggSpawn"..module.revision,
 }
 
-module:RegisterYellEngage(L["trigger_engage"])
+--module:RegisterYellEngage(L["trigger_engage"])
 
 function module:OnEnable()
 	--self:RegisterEvent("CHAT_MSG_SAY", "Event")--Debug
@@ -76,8 +76,10 @@ function module:OnEnable()
 	self:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_SELF", "Event")--trigger_leechingBiteFade
 	
 	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_CREATURE_DAMAGE", "Event")--trigger_volley
+	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_PARTY_DAMAGE", "Event")--trigger_volley
+	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_SELF_DAMAGE", "Event")--trigger_volley
 	
-	self:RegisterEvent("CHAT_MSG_MONSTER_YELL", "Event")--trigger_eggSpawn
+	self:RegisterEvent("CHAT_MSG_MONSTER_YELL")--trigger_eggSpawn
 	
 	self:ThrottleSync(5, syncName.volley)
 	self:ThrottleSync(5, syncName.leechingBite)
@@ -98,8 +100,16 @@ end
 function module:OnDisengage()
 end
 
+function module:CHAT_MSG_MONSTER_YELL(msg, sender)
+	if msg == L["trigger_engage"] then
+		module:SendEngageSync()
+	elseif msg == L["trigger_eggSpawn"] then
+		self:Sync(syncName.eggSpawn)
+	end
+end
+
 function module:Event(msg)
-	if msg == L["trigger_volley"] then
+	if string.find(msg, L["trigger_volley"]) then
 		self:Sync(syncName.volley)
 	
 	elseif msg == L["trigger_leechingBiteYou"] then
@@ -114,8 +124,6 @@ function module:Event(msg)
 		if leechingBiteFadeTarget == "you" then leechingBiteFadeTarget = UnitName("Player") end
 		self:Sync(syncName.leechingBiteFade .. " " .. leechingBiteFadeTarget)
 		
-	elseif msg == L["trigger_eggSpawn"] then
-		self:Sync(syncName.eggSpawn)
 	end
 end
 
