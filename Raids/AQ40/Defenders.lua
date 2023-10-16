@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Anubisath Defender", "Ahn'Qiraj")
 
-module.revision = 30019
+module.revision = 30024
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"reflect", "plagueyou", "plagueother", "icon", "thunderclap", "shadowstorm", "meteor", -1, "explode", "enrage"}
 module.trashMod = true
@@ -91,7 +91,7 @@ module.defaultDB = {
 }
 
 local timer = {
-	meteor = {8,13},
+	meteor = {6.4,13},--saw 6.4
 	explode = 6,
 	arcref = 600,
 	sharef = 600,

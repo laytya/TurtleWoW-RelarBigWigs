@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("The Prophet Skeram", "Ahn'Qiraj")
 
-module.revision = 30019
+module.revision = 30024
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"mc", "bosskill"}
 
@@ -26,6 +26,8 @@ L:RegisterTranslations("enUS", function() return {
 	splitsoon_message = "Split soon! Get ready!",
 	split_message = "Split!",
 	kill_trigger = "You only delay",
+	
+	["You have slain %s!"] = true,
 } end )
 
 local timer = {
@@ -129,7 +131,7 @@ end
 function module:MC(rest)
 	if IsRaidLeader() or IsRaidOfficer() then
 		TargetByName(rest,true)
-		SetRaidTarget("target",8)
+		SetRaidTarget("target",4)
 		TargetLastTarget()
 	end
 	

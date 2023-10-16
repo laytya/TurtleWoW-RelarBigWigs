@@ -2,7 +2,7 @@
 local module, L = BigWigs:ModuleDeclaration("General Rajaxx", "Ruins of Ahn'Qiraj")
 local andorov = AceLibrary("Babble-Boss-2.2")["Lieutenant General Andorov"]
 
-module.revision = 30012
+module.revision = 30024
 module.enabletrigger = {module.translatedName, andorov}
 module.toggleoptions = {"wave", "fear", "attackorder", "lightningcloud", "shockwave", "shield", "knockback", "enlarge", "thundercrash", "bosskill"}
 
@@ -395,7 +395,7 @@ function module:AttackOrderFade(rest)
 end
 
 function module:LightningCloud()
-	self:Message(L["msg_LightningCloud"], "Important", false, "Info")
+	self:Message(L["msg_lightningCloud"], "Important", false, "Info")
 	self:WarningSign(icon.lightningCloud, 3)
 end
 
