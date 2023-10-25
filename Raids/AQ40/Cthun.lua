@@ -1,14 +1,11 @@
 
-----------------------------------
---      Module Declaration      --
-----------------------------------
-
 local module, L = BigWigs:ModuleDeclaration("C'Thun", "Ahn'Qiraj")
 
-
-----------------------------
---      Localization      --
-----------------------------
+module.revision = 30024
+local eyeofcthun = AceLibrary("Babble-Boss-2.2")["Eye of C'Thun"]
+local cthun = AceLibrary("Babble-Boss-2.2")["C'Thun"]
+module.enabletrigger = {eyeofcthun, cthun}
+module.toggleoptions = {"rape", -1, "tentacle", "glare", "group", -1, "giant", "acid", "weakened", -1, "proximity", "stomach", "bosskill"}
 
 L:RegisterTranslations("enUS", function() return {
 	cmd = "Cthun",
@@ -93,6 +90,9 @@ L:RegisterTranslations("enUS", function() return {
 	stomach_name = "Players in Stomach",
 	stomach_desc = "Show players in stomach instead of too close players",
 
+	window_bar = "Window of Opportunity",
+	trigger_bigClawDies = "Giant Claw Tentacle dies.",
+	trigger_bigEyeDies = "Giant Eye Tentacle dies.",
 } end )
 
 L:RegisterTranslations("esES", function() return {
@@ -252,26 +252,11 @@ L:RegisterTranslations("deDE", function() return {
 	proximity_desc = "Zeit das Nähe Warnungsfenster",
 } end )
 
-
----------------------------------
---      	Variables 		   --
----------------------------------
-
--- module variables
-module.revision = 30019 -- To be overridden by the module!
-local eyeofcthun = AceLibrary("Babble-Boss-2.2")["Eye of C'Thun"]
-local cthun = AceLibrary("Babble-Boss-2.2")["C'Thun"]
-module.enabletrigger = {eyeofcthun, cthun} -- string or table {boss, add1, add2}
---module.wipemobs = { L["add_name"] } -- adds which will be considered in CheckForEngage
-module.toggleoptions = {"rape", -1, "tentacle", "glare", "group", -1, "giant", "acid", "weakened", -1, "proximity", "stomach", "bosskill"}
-
--- Proximity Plugin
 module.proximityCheck = function(unit) return CheckInteractDistance(unit, 2) end
 module.proximitySilent = false
 
-
--- locals
 local timer = {
+	nextspawn = 28,
 	p1RandomEyeBeams = 6, -- how long does eye of c'thun target the same player at the beginning
 	p1Tentacle = 45,      -- tentacle timers for phase 1
 	p1TentacleStart = 45, -- delay for first tentacles from engage onwards
@@ -299,6 +284,7 @@ local timer = {
 	eyeBeam = 2,         -- Eye Beam Cast time
 }
 local icon = {
+	window = "inv_misc_pocketwatch_01",
 	giantEye = "inv_misc_eye_01", --"Interface\\Icons\\Ability_EyeOfTheOwl"
 	giantClaw = "Spell_Nature_Earthquake",
 	eyeTentacles = "spell_shadow_siphonmana", --"Interface\\Icons\\Spell_Nature_CallStorm"
@@ -317,6 +303,7 @@ local syncName = {
 	giantEyeSpawn = "GiantEyeSpawn"..module.revision,
 	eyeBeam = "CThunEyeBeam"..module.revision,
 	fleshtentacledead = "CThunFleshTentacleDead"..module.revision,
+	window = "CThunWindow"..module.revision,
 }
 
 local gianteye = "Giant Eye Tentacle"
@@ -335,12 +322,6 @@ local doCheckForWipe = false
 
 local eyeTarget = nil
 
-
-------------------------------
---      Initialization      --
-------------------------------
-
--- called after module is enabled
 function module:OnEnable()
 
 	self:RegisterEvent("CHAT_MSG_MONSTER_EMOTE", "Emote")
@@ -358,9 +339,9 @@ function module:OnEnable()
 	self:ThrottleSync(25, syncName.giantClawSpawn)
 	self:ThrottleSync(25, syncName.giantEyeSpawn)
 	self:ThrottleSync(25, syncName.tentacleSpawn)
+	self:ThrottleSync(5, syncName.window)
 end
 
--- called after module is enabled and after each wipe
 function module:OnSetup()
 	self:RegisterEvent("CHAT_MSG_COMBAT_HOSTILE_DEATH")
 
@@ -381,21 +362,14 @@ function module:OnSetup()
 	self:TriggerEvent("BigWigs_StopDebuffTrack")
 end
 
--- called after boss is engaged
 function module:OnEngage()
 	self:CThunStart()
 end
 
--- called after boss is disengaged (wipe(retreat) or victory)
 function module:OnDisengage()
 	self:RemoveProximity()
 	self:TriggerEvent("BigWigs_StopDebuffTrack")
 end
-
-
-----------------------
---  Event Handlers  --
-----------------------
 
 function module:CHAT_MSG_COMBAT_HOSTILE_DEATH(msg)
 	BigWigs:CheckForBossDeath(msg, self)
@@ -406,6 +380,10 @@ function module:CHAT_MSG_COMBAT_HOSTILE_DEATH(msg)
 		self:Sync(syncName.giantEyeDown)
 	elseif (msg == string.format(UNITDIESOTHER, fleshtentacle)) and not fleshtentacledead then
 		self:Sync(syncName.fleshtentacledead)
+	end
+	
+	if msg == L["trigger_bigClawDies"] or msg == L["trigger_bigEyeDies"] then
+		self:Sync(syncName.window)
 	end
 end
 
@@ -446,9 +424,8 @@ function module:CheckDigestiveAcid(msg)
 	end
 end
 
-------------------------------
---      Synchronization	    --
-------------------------------
+
+
 
 function module:BigWigs_RecvSync(sync, rest, nick)
 	if sync == syncName.p2Start then
@@ -462,8 +439,10 @@ function module:BigWigs_RecvSync(sync, rest, nick)
 	elseif sync == syncName.eyeBeam then
 		self:EyeBeam()
 	elseif sync == syncName.giantClawSpawn then
+		lastspawn = GetTime()
 		self:GCTentacleRape()
 	elseif sync == syncName.giantEyeSpawn then
+		lastspawn = GetTime()
 		self:GTentacleRape()
 	elseif sync == syncName.tentacleSpawn then
 		self:TentacleRape()
@@ -474,12 +453,19 @@ function module:BigWigs_RecvSync(sync, rest, nick)
 		self:TriggerEvent("BigWigs_StopHPBar", self, L["First Tentacle"])
 		self:TriggerEvent("BigWigs_StartHPBar", self, L["Second Tentacle"], 100)
 		self:TriggerEvent("BigWigs_SetHPBar", self, L["Second Tentacle"], 0)
+	elseif sync == syncName.window then
+		self:Window()
 	end
 end
 
------------------------
---   Sync Handlers   --
------------------------
+
+
+function module:Window()
+	local window = (lastspawn + timer.nextspawn) - GetTime()
+	if window > 0 then
+		self:Bar(L["window_bar"], window, icon.window, true, "white")
+	end
+end
 
 function module:CThunStart()
 	self:DebugMessage("CThunStart: ")

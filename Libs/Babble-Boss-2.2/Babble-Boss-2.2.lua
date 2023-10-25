@@ -28,6 +28,8 @@ local BabbleBoss = AceLibrary("AceLocale-2.2"):new(MAJOR_VERSION)
 
 BabbleBoss:RegisterTranslations("enUS", function()
 	return {
+		["Rookery Hatcher"] = true,
+		["Rookery Guardian"] = true,
 		["Sanctum Dragonkin"] = true,
 		["Sanctum Dreamer"] = true,
 		["Sanctum Supressor"] = true,
@@ -48,6 +50,7 @@ BabbleBoss:RegisterTranslations("enUS", function()
 		["Deathknight Captain"] = true,
 		["Death Talon Wyrmguard"] = true,
 		["Anubisath Sentinel"] = true,
+		["Qiraji Brainwasher"] = true,
 		["Qiraji Mindslayer"] = true,
 		["Qiraji Champion"] = true,
 		["Flesh Hunter"] = true,

@@ -90,8 +90,8 @@ function module:OnEnable()
 	self:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_PARTY", "Event")--trigger_entangleFade
 	self:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_SELF", "Event")--trigger_entangleFade
 	
-	self:ThrottleSync(3, syncName.entangle)
-	self:ThrottleSync(3, syncName.entangleFade)
+	self:ThrottleSync(0.1, syncName.entangle)
+	self:ThrottleSync(0.1, syncName.entangleFade)
 	self:ThrottleSync(3, syncName.wound)
 end
 
@@ -152,7 +152,8 @@ end
 function module:Wound(rest)
 	local woundPlayer = strsub(rest,0,strfind(rest," ") - 1)
 	local woundQty = tonumber(strsub(rest,strfind(rest," "),strlen(rest)))
-
+	
+	self:RemoveBar(woundPlayer.." ".."1"..L["bar_wound"])
 	self:RemoveBar(woundPlayer.." ".."2"..L["bar_wound"])
 	self:RemoveBar(woundPlayer.." ".."3"..L["bar_wound"])
 	self:RemoveBar(woundPlayer.." ".."4"..L["bar_wound"])

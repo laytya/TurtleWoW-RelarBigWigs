@@ -126,7 +126,7 @@ local firstsharef = true
 local firstmend = true
 
 function module:OnEnable()
-	self:RegisterEvent("CHAT_MSG_SAY", "Event")--Debug
+	--self:RegisterEvent("CHAT_MSG_SAY", "Abilities")--Debug
 	self:RegisterEvent("CHAT_MSG_COMBAT_CREATURE_VS_SELF_HITS", "Abilities")
 	self:RegisterEvent("CHAT_MSG_SPELL_SELF_DAMAGE", "Abilities")
 	self:RegisterEvent("CHAT_MSG_SPELL_PARTY_DAMAGE", "Abilities")

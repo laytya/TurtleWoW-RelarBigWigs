@@ -3,7 +3,7 @@ local module, L = BigWigs:ModuleDeclaration("Pyroguard Emberseer", "Blackrock Sp
 local adds = AceLibrary("Babble-Boss-2.2")["Blackhand Incarcerator"]
 local boss = AceLibrary("Babble-Boss-2.2")["Pyroguard Emberseer"]
 
-module.revision = 30002
+module.revision = 30025
 module.enabletrigger = {adds, boss}
 module.toggleoptions = {"firenova", "bosskill"}
 module.zonename = {
@@ -18,45 +18,44 @@ L:RegisterTranslations("enUS", function() return {
 	firenova_name = "Fire Nova Timer",
 	firenova_desc = "Indicates time left to next Fire Nova.",
 
-	timer_bar = "seconds to boss",
+	trigger_engage = "Ha! Ha! Ha! Thank you for freeing me, fools. Now let me repay you by charring the flesh from your bones.",--CHAT_MSG_MONSTER_SAY
 
-	firenova_bar = "Fire Nova",
-	firenova_trigger = "Fire Nova",
-
-	bossfree_trigger = "Ha! Ha! Ha! Thank you for freeing me, fools. Now let me repay",
-	bossdeath_trigger = "Pyroguard Emberseer dies.",
-
+	trigger_firenova = "Fire Nova",--CHAT_MSG_SPELL_CREATURE_VS_SELF_DAMAGE // CHAT_MSG_SPELL_CREATURE_VS_PARTY_DAMAGE // CHAT_MSG_SPELL_CREATURE_VS_CREATURE_DAMAGE
+	bar_firenova = "Fire Nova",
+	
+	msg_addDead = "/7 Incarcerator Dead",
+	
+	trigger_bossDead = "Pyroguard Emberseer dies.",--CHAT_MSG_COMBAT_HOSTILE_DEATH
 } end )
 
 local timer = {
 	firenova = 6,
 }
-
 local icon = {
 	firenova = "spell_fire_sealoffire",
 }
-
 local syncName = {
-	firstfirenova = "emberseerFirstFireNova"..module.revision,
 	firenova = "emberseerFirenova"..module.revision,
-	bossdeath = "emberseerBossdeath"..module.revision,
+}
+local color = {
+	firenova = "Red",
 }
 
 function module:OnEnable()
-	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_PARTY_DAMAGE", "Event") -- fire nova
-	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_CREATURE_DAMAGE", "Event") -- fire nova
-	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_SELF_DAMAGE", "Event") -- fire nova
-	self:RegisterEvent("CHAT_MSG_COMBAT_HOSTILE_DEATH", "Event") -- boss death -> module disabled
-	--self:RegisterEvent("CHAT_MSG_MONSTER_SAY", "Event") -- mangos boss free trigger
-	--self:RegisterEvent("CHAT_MSG_SAY", "Event") -- testing purposes
-
+	--self:RegisterEvent("CHAT_MSG_SAY", "Event") --debug
+	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_SELF_DAMAGE", "Event") --trigger_firenova
+	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_PARTY_DAMAGE", "Event") --trigger_firenova
+	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_CREATURE_DAMAGE", "Event") --trigger_firenova
+	
+	self:RegisterEvent("CHAT_MSG_MONSTER_SAY") --trigger_engage
+	
 	self:ThrottleSync(3, syncName.firenova)
-	self:ThrottleSync(3, syncName.firstfirenova)
-	self:ThrottleSync(3, syncName.bossdeath)
 end
 
 function module:OnSetup()
 	self.started = nil
+	self:RegisterEvent("CHAT_MSG_COMBAT_HOSTILE_DEATH")
+	bwIncarceratorDeadCount = 0
 end
 
 function module:OnEngage()
@@ -65,40 +64,44 @@ end
 function module:OnDisengage()
 end
 
-function module:Event(msg)
+function module:OnRegister()
+	self:RegisterEvent("MINIMAP_ZONE_CHANGED")
+end
+function module:MINIMAP_ZONE_CHANGED(msg)
+	if GetMinimapZoneText() ~= "Hall of Binding" or self.core:IsModuleActive(module.translatedName) then
+		return
+	end
 
-	if string.find(msg, L["bossdeath_trigger"]) then
-		self:Sync(syncName.bossdeath)
-	elseif string.find(msg, L["firenova_trigger"]) then
+	self.core:EnableModule(module.translatedName)
+end
+
+function module:CHAT_MSG_MONSTER_SAY(msg)
+	if msg == L["trigger_engage"] then
+		module:SendEngageSync()
+	end
+end
+
+function module:CHAT_MSG_COMBAT_HOSTILE_DEATH(msg)
+	if msg == L["trigger_bossDead"] then
+		self:SendBossDeathSync()
+	elseif msg == string.format(UNITDIESOTHER, "Blackhand Incarcerator") then
+		bwIncarceratorDeadCount = bwIncarceratorDeadCount + 1
+		self:Message(bwIncarceratorDeadCount..L["msg_addDead"], "Important", false, nil, false)
+	end
+end
+
+function module:Event(msg)
+	if string.find(msg, L["trigger_firenova"]) then
 		self:Sync(syncName.firenova)
 	end
 end
 
 function module:BigWigs_RecvSync(sync, rest, nick)
-
-	if sync == syncName.bossdeath then
-		self:Bossdeath()
-	elseif sync == syncName.firstfirenova then
-		self:FirstFirenova()
-	elseif sync == syncName.firenova then
+	if sync == syncName.firenova and self.db.profile.firenova then
 		self:Firenova()
 	end
 end
 
-function module:FirstFirenova()
-	if self.db.profile.firenova then
-		self:Bar(L["firenova_bar"], timer.firenova, icon.firenova, true, "Red")
-	end
-end
-
 function module:Firenova()
-	if self.db.profile.firenova then
-		self:Bar(L["firenova_bar"], timer.firenova, icon.firenova, true, "Red")
-	end
-end
-
-function module:Bossdeath()
-	if self.db.profile.bosskill then
-		self.core:ToggleModuleActive(self, false)
-	end
+	self:Bar(L["bar_firenova"], timer.firenova, icon.firenova, true, color.firenova)
 end

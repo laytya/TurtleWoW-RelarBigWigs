@@ -2,7 +2,7 @@
 local module, L = BigWigs:ModuleDeclaration("General Rajaxx", "Ruins of Ahn'Qiraj")
 local andorov = AceLibrary("Babble-Boss-2.2")["Lieutenant General Andorov"]
 
-module.revision = 30024
+module.revision = 30025
 module.enabletrigger = {module.translatedName, andorov}
 module.toggleoptions = {"wave", "fear", "attackorder", "lightningcloud", "shockwave", "shield", "knockback", "enlarge", "thundercrash", "bosskill"}
 
@@ -48,7 +48,8 @@ L:RegisterTranslations("enUS", function() return {
 	trigger_eventStarted = "Remember, Rajaxx, when I said I'd kill you last?",--CHAT_MSG_MONSTER_YELL
 	bar_eventStart = "Encounter begins",
 	
-	trigger_wave1 = "Kill first, ask questions later... Incoming!",--CHAT_MSG_MONSTER_YELL
+	--not using trigger_wave1 -> bc if you body pull, will cause the trigger to happen at wave 2
+	--trigger_wave1 = "Kill first, ask questions later... Incoming!",--CHAT_MSG_MONSTER_YELL
 	msg_wave1 = "Wave 1/8 -- 4 Warriors, 2 Needlers, Qeez -> Fear",
 	trigger_fear = "afflicted by Intimidating Shout.",--CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE // CHAT_MSG_SPELL_PERIODIC_PARTY_DAMAGE // CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE
 	bar_fear = "Fear CD",
@@ -143,9 +144,8 @@ local syncName = {
 	thundercrash = "RajaxxThundercrash"..module.revision,
 }
 
---module:RegisterYellEngage(L["trigger_eventStarted"])
-
 function module:OnEnable()
+	--self:RegisterEvent("CHAT_MSG_SAY", "Event")--debug
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_CREATURE_DAMAGE", "Event")--Fear, AttackOrder
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE", "Event")--Fear, AttackOrder, shockwave
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_PARTY_DAMAGE", "Event")--Fear, AttackOrder, shockwave
@@ -196,7 +196,6 @@ function module:OnDisengage()
 end
 
 function module:CheckForWipe()
--- ignore wipe check
 end
 
 function module:CHAT_MSG_COMBAT_HOSTILE_DEATH(msg)
@@ -207,11 +206,11 @@ end
 
 function module:CHAT_MSG_MONSTER_YELL(msg, sender)
 	if msg == L["trigger_eventStarted"] and sender == "Lieutenant General Andorov" then
-		--somehow RegisterYellEngage didn't work once!? so this should bypass
 		module:SendEngageSync()
-	
-	elseif string.find(msg, L["trigger_wave1"]) then
 		self:Sync(syncName.wave1)
+		
+	--elseif string.find(msg, L["trigger_wave1"]) then
+		--self:Sync(syncName.wave1)
 		
 	--no yells for wave 2
 
@@ -379,9 +378,11 @@ function module:AttackOrder(rest)
 	self:SetCandyBarOnClick("BigWigsBar "..rest..L["bar_attackOrder"].. " >Click Me<", function(name, button, extra) TargetByName(extra, true) end, rest)
 	
 	if IsRaidLeader() or IsRaidOfficer() then
-		TargetByName(rest,true)
-		SetRaidTarget("target",8)
-		TargetLastTarget()
+		if UnitClass("Player") ~= "Rogue" then
+			TargetByName(rest,true)
+			SetRaidTarget("target",8)
+			TargetLastTarget()
+		end
 	end
 end
 

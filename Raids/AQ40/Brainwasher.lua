@@ -1,51 +1,58 @@
 
-local module, L = BigWigs:ModuleDeclaration("The Prophet Skeram", "Ahn'Qiraj")
+local module, L = BigWigs:ModuleDeclaration("Qiraji Brainwasher", "Ahn'Qiraj")
 
 module.revision = 30025
 module.enabletrigger = module.translatedName
-module.toggleoptions = {"mc", "bosskill"}
+module.toggleoptions = {"mc"}
+module.trashMod = true
 
 L:RegisterTranslations("enUS", function() return {
-	cmd = "Skeram",
-
+	cmd = "BrainWasher",
+	
 	mc_cmd = "mc",
 	mc_name = "Mind Control Alert",
 	mc_desc = "Warn for Mind Control",
-
-	split_cmd = "split",
-	split_name = "Split Alert",
-	split_desc = "Warn before Splitting",
 	
-	trigger_mcYou = "You are afflicted by True Fulfillment.",--CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE (unconfirmed)
-	trigger_mcOther = "(.+) is afflicted by True Fulfillment.",--CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE
-	msg_mc = " is MC",
+	trigger_mcYou = "You are afflicted by Cause Insanity.",--CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE          --To be confirmed
+	trigger_mcOther = "(.+) is afflicted by Cause Insanity.",--CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE
+	trigger_mcFade = "Cause Insanity fades from (.+).",--CHAT_MSG_SPELL_AURA_GONE_SELF // CHAT_MSG_SPELL_AURA_GONE_PARTY // CHAT_MSG_SPELL_AURA_GONE_OTHER
 	bar_mc = " MC",
 	
-	trigger_kill = "You only delay... the inevetable.",--CHAT_MSG_MONSTER_YELL
-
-	splitsoon_message = "Split soon! Get ready!",
-	split_message = "Split!",
-	kill_trigger = "You only delay",
-	
 	["You have slain %s!"] = true,
+	
 } end )
 
+module.defaultDB = {
+	bosskill = nil,
+}
+
 local timer = {
-	mc = 20,
+	mc = 10,
 }
+
 local icon = {
-	mc = "Spell_Shadow_Charm",
+	mc = "spell_shadow_shadowworddominate",
 }
+
+local color = {
+	mc = "Black",
+}
+
 local syncName = {
-	mc = "SkeramMC"..module.revision,
+	mc = "BrainwasherMc"..module.revision,
+	mcFade = "BrainwasherMcFade"..module.revision,
 }
 
 function module:OnEnable()
-	self:RegisterEvent("CHAT_MSG_MONSTER_YELL")--trigger_kill
-	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE", "Event")--mcYou
-	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE", "Event")--mcOther
-
+	self:RegisterEvent("CHAT_MSG_SAY", "Events")--Debug
+	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_HOSTILEPLAYER_DAMAGE", "Events")--trigger_mcOther
+	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE", "Events")--trigger_mcYou
+	self:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_SELF", "Events")--trigger_mcFade
+	self:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_PARTY", "Events")--trigger_mcFade
+	self:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_OTHER", "Events")--trigger_mcFade
+	
 	self:ThrottleSync(1, syncName.mc)
+	self:ThrottleSync(1, syncName.mcFade)
 end
 
 function module:OnSetup()
@@ -56,9 +63,6 @@ function module:OnEngage()
 end
 
 function module:OnDisengage()
-end
-
-function module:CheckForWipe()
 end
 
 function module:CheckForBossDeath(msg)
@@ -99,46 +103,43 @@ function module:CheckForBossDeath(msg)
 	end
 end
 
-function module:CHAT_MSG_MONSTER_YELL(msg)
-	if string.find(msg, L["kill_trigger"]) then
-		self:SendBossDeathSync()
-		--BigWigs:Debug("yell kill trigger")
-	end
-end
-
-function module:Event(msg)
-	if UnitName("target") ~= nil and (IsRaidLeader() or IsRaidOfficer()) then
-		if UnitName("target") == "The Prophet Skeram" then
-			if UnitHealthMax("target") > 350000 then
-				SetRaidTarget("target",6)
-			end
-		end
-	end
-	
+function module:Events(msg)
 	if msg == L["trigger_mcYou"] then
-		self:Sync(syncName.mc .. " " .. UnitName("player"))
+		self:Sync(syncName.mc .. " " .. UnitName("Player"))
+		
 	elseif string.find(msg, L["trigger_mcOther"]) then
 		local _,_, mcPerson, _ = string.find(msg, L["trigger_mcOther"])
 		self:Sync(syncName.mc .. " " .. mcPerson)
+		
+	elseif string.find(msg, L["trigger_mcFade"]) then
+		local _,_, mcFadePerson, _ = string.find(msg, L["trigger_mcFade"])
+		if mcFadePerson == "you" then mcFadePerson = UnitName("Player") end
+		self:Sync(syncName.mcFade .. " " .. mcFadePerson)
 	end
 end
+
 
 function module:BigWigs_RecvSync(sync, rest, nick)
 	if sync == syncName.mc and rest and self.db.profile.mc then
-		self:MC(rest)
+		self:Mc(rest)
+	elseif sync == syncName.mcFade and rest and self.db.profile.mc then
+		self:McFade(rest)
 	end
 end
 
-function module:MC(rest)
+
+function module:Mc(rest)
+	self:Bar(rest..L["bar_mc"], timer.mc, icon.mc, true, color.mc)
+	
 	if IsRaidLeader() or IsRaidOfficer() then
 		if UnitClass("Player") ~= "Rogue" then
 			TargetByName(rest,true)
-			SetRaidTarget("target",4)
+			SetRaidTarget("target",6)
 			TargetLastTarget()
 		end
 	end
-	
-	self:Bar(rest..L["bar_mc"].. " >Click Me<", timer.mc, icon.mc, true, "White")
-	self:SetCandyBarOnClick("BigWigsBar "..rest..L["bar_mc"].. " >Click Me<", function(name, button, extra) TargetByName(extra, true) end, rest)
-	self:Message(rest..L["msg_mc"], "Attention")
+end
+
+function module:McFade(rest)
+	self:RemoveBar(rest..L["bar_mc"])
 end

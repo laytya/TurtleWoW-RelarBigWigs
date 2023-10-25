@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Ayamiss the Hunter", "Ruins of Ahn'Qiraj")
 
-module.revision = 30012
+module.revision = 30025
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"bigicon", "sacrifice", "bosskill"}
 
@@ -120,9 +120,11 @@ function module:Sacrifice(rest)
 	end
 	
 	if IsRaidLeader() or IsRaidOfficer() then
-		TargetByName("Hive'Zara Larva",true)
-		SetRaidTarget("target",8)
-		TargetLastTarget()
+		if UnitClass("Player") ~= "Rogue" then
+			TargetByName("Hive'Zara Larva",true)
+			SetRaidTarget("target",8)
+			TargetLastTarget()
+		end
 	end
 	
 	self:Bar(L["nextlarva_bar"], timer.larvacd, icon.sacrifice, true, "white")

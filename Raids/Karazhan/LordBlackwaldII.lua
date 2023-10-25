@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Lord Blackwald II", "Karazhan")
 
-module.revision = 30023
+module.revision = 30025
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"reaverstorm", "boon", "empoweredsoul", "summon", "bosskill"}
 module.zonename = {
@@ -51,7 +51,7 @@ L:RegisterTranslations("enUS", function() return {
 } end )
 
 local timer = {
-	reaverstormCd = 7,--saw 4.7sec wtf!
+	reaverstormCd = 5.5,
 	reaverstormCast = 1.5,
 	boon = 15,--timer TBD
 	empoweredSoul = 10,

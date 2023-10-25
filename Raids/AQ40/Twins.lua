@@ -1,23 +1,13 @@
 
-----------------------------------
---      Module Declaration      --
-----------------------------------
-
 local module, L = BigWigs:ModuleDeclaration("The Twin Emperors", "Ahn'Qiraj")
 
-------------------------------
---      Are you local?      --
-------------------------------
-
+module.revision = 30025 
 local veklor = AceLibrary("Babble-Boss-2.2")["Emperor Vek'lor"]
 local veknilash = AceLibrary("Babble-Boss-2.2")["Emperor Vek'nilash"]
 local boss = AceLibrary("Babble-Boss-2.2")["The Twin Emperors"]
 local L = AceLibrary("AceLocale-2.2"):new("BigWigs" .. boss)
-local twinstarted = nil
-
-----------------------------
---      Localization      --
-----------------------------
+module.enabletrigger = {veklor, veknilash}
+module.toggleoptions = {"bug", "teleport", "enrage", "heal", "blizzard", "bosskill"}
 
 L:RegisterTranslations("enUS", function() return {
 	cmd = "Twins",
@@ -43,14 +33,14 @@ L:RegisterTranslations("enUS", function() return {
 	blizzard_desc = "Shows an Icon if you are standing in a Blizzard",
 
 	porttrigger = "gains Twin Teleport.",
-	portwarn = "Teleport!",
+	portwarn = "Teleport within 10sec!",
 	portdelaywarn = "Teleport in 5 seconds!",
 	portdelaywarn10 = "Teleport in 10 seconds!",
-	bartext = "Teleport",
+	bartext = "Teleport CD",
 	explodebugtrigger = "gains Explode Bug",
 	explodebugwarn = "Bug exploding nearby!",
 	enragetrigger = "becomes enraged.",
-	--trigger = "Blizzard",
+
 	enragewarn = "Twins are enraged",
 	healtrigger1 = "'s Heal Brother heals",
 	healtrigger2 = " Heal Brother heals",
@@ -206,16 +196,6 @@ L:RegisterTranslations("deDE", function() return {
 		kill_trigger = "Mein Bruder...",
 } end )
 
-
--- module variables
-module.revision = 20008 -- To be overridden by the module!
-local veklor = AceLibrary("Babble-Boss-2.2")["Emperor Vek'lor"]
-local veknilash = AceLibrary("Babble-Boss-2.2")["Emperor Vek'nilash"]
-module.enabletrigger = {veklor, veknilash} -- string or table {boss, add1, add2}
---module.wipemobs = { L["add_name"] } -- adds which will be considered in CheckForEngage
-module.toggleoptions = {"bug", "teleport", "enrage", "heal", "blizzard", "bosskill"}
-
--- locals
 local timer = {
 	earliestTeleport = 30,
 	latestTeleport = 40,
@@ -232,13 +212,6 @@ local syncName = {
 	teleport_old = "TwinsTeleport"..module.revision,
 }
 
-local berserkannounced = nil
-
-
-------------------------------
---      Initialization      --
-------------------------------
-
 module:RegisterYellEngage(L["pull_trigger1"])
 module:RegisterYellEngage(L["pull_trigger2"])
 module:RegisterYellEngage(L["pull_trigger3"])
@@ -250,7 +223,6 @@ module:RegisterYellEngage(L["pull_trigger8"])
 module:RegisterYellEngage(L["pull_trigger9"])
 module:RegisterYellEngage(L["pull_trigger10"])
 
--- called after module is enabled
 function module:OnEnable()
 	self:RegisterEvent("CHAT_MSG_MONSTER_YELL")
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE")
@@ -261,12 +233,10 @@ function module:OnEnable()
 	self:ThrottleSync(28, syncName.teleport)
 end
 
--- called after module is enabled and after each wipe
 function module:OnSetup()
 	self.started = nil
 end
 
--- called after boss is engaged
 function module:OnEngage()
 	self:Sync(syncName.teleport)
 
@@ -284,14 +254,8 @@ function module:OnEngage()
 	end
 end
 
--- called after boss is disengaged (wipe(retreat) or victory)
 function module:OnDisengage()
 end
-
-
-------------------------------
---      Event Handlers      --
-------------------------------
 
 function module:CheckForBossDeath(msg)
 	if msg == string.format(UNITDIESOTHER, veklor) or msg == string.format(UNITDIESOTHER, veknilash) then
@@ -346,27 +310,15 @@ function module:CHAT_MSG_MONSTER_EMOTE(msg)
 	end
 end
 
-
-------------------------------
---      Synchronization	    --
-------------------------------
-
 function module:BigWigs_RecvSync(sync, rest, nick)
 	if sync == syncName.teleport then
 		self:Teleport()
 	end
 end
 
-------------------------------
---      Sync Handlers	    --
-------------------------------
-
 function module:Teleport()
 	if self.db.profile.teleport then
 		self:IntervalBar(L["bartext"], timer.earliestTeleport, timer.latestTeleport, icon.teleport, true, "White")
-
-		--self:DelayedSync(timer.teleport, syncName.teleport_old)
-		--self:DelayedSync(timer.teleport, syncName.teleport)
 
 		self:DelayedSound(timer.earliestTeleport - 10, "Ten")
 		self:DelayedSound(timer.earliestTeleport - 3, "Three")

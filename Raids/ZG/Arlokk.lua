@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("High Priestess Arlokk", "Zul'Gurub")
 
-module.revision = 30012
+module.revision = 30025
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"phase", "whirlwind", "vanish", "mark", "puticon", "bosskill"}
 
@@ -33,7 +33,7 @@ L:RegisterTranslations("enUS", function() return {
 	trigger_mark = "(.+) is afflicted by Mark of Arlokk.",--CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE // CHAT_MSG_SPELL_PERIODIC_PARTY_DAMAGE
 	trigger_markYou = "You are afflicted by Mark of Arlokk.",--CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE
 	msg_mark = " is Marked!",
-	bar_mark = "Mark ",
+	bar_mark = " Marked",
 	
 	trigger_markFade = "Mark of Arlokk fades from (.+).",--CHAT_MSG_SPELL_AURA_GONE_OTHER // CHAT_MSG_SPELL_AURA_GONE_PARTY // CHAT_MSG_SPELL_AURA_GONE_SELF
 
@@ -70,6 +70,7 @@ local syncName = {
 module:RegisterYellEngage(L["trigger_engage"])
 
 function module:OnEnable()
+	--self:RegisterEvent("CHAT_MSG_SAY", "Event") --debug
 	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_CREATURE_DAMAGE", "Event")--ww
 	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_PARTY_DAMAGE", "Event")--ww
 	self:RegisterEvent("CHAT_MSG_SPELL_CREATURE_VS_SELF_DAMAGE", "Event")--ww
@@ -137,20 +138,22 @@ end
 
 
 function module:Mark(rest)
-	DEFAULT_CHAT_FRAME:AddMessage("MarkRest: "..rest)
 	self:Message(rest..L["msg_mark"], "Attention")
-	
-	self:Bar(string.format(L["bar_mark"], rest .. " >Click Me!<"), timer.mark, icon.mark, true, "Green")
-	self:SetCandyBarOnClick("BigWigsBar "..string.format(L["bar_mark"], rest .. " >Click Me!<"), function(name, button, extra) TargetByName(extra, true) end, rest)
-	
-	if self.db.profile.puticon then
-		self:Icon(rest)
+
+	self:Bar(rest..L["bar_mark"].. " >Click Me<", timer.mark, icon.mark, true, "Green")
+	self:SetCandyBarOnClick("BigWigsBar "..rest..L["bar_mark"].. " >Click Me<", function(name, button, extra) TargetByName(extra, true) end, rest)
+
+	if IsRaidLeader() or IsRaidOfficer() then
+		if UnitClass("Player") ~= "Rogue" then
+			TargetByName(rest,true)
+			SetRaidTarget("target",8)
+			TargetLastTarget()
+		end
 	end
 end
 
 function module:MarkFade(rest)
-	DEFAULT_CHAT_FRAME:AddMessage("MarkFadeRest: "..rest)
-	self:RemoveBar(string.format(L["bar_mark"], rest .. " >Click Me!<"))
+	self:RemoveBar(rest..L["bar_mark"].. " >Click Me<")
 end
 
 function module:Whirlwind()

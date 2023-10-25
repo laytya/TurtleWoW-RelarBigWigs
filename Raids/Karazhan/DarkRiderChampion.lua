@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Dark Rider Champion", "Karazhan")
 
-module.revision = 30020
+module.revision = 30025
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"reaverstorm"}
 module.trashMod = true
@@ -30,7 +30,7 @@ module.defaultDB = {
 }
 
 local timer = {
-	reaverstormCd = 7,
+	reaverstormCd = 5.5,
 	reaverstormCast = 1.5,
 }
 local icon = {
