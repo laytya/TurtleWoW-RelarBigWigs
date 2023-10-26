@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Grand Widow Faerlina", "Naxxramas")
 
-module.revision = 30012
+module.revision = 30026
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"mc", "sounds", "bigicon", "raidSilence", "poison", "silence", "enrage", "rain", "bosskill"}
 
@@ -288,6 +288,12 @@ function module:WorshipperDies()
 end
 
 function module:Embrace()
+	--if WorshipperDies withint 5sec of Enrage Fading, then you removed the enrage, so don't go through this code or you'll get:
+		--Enrage Silenced!
+		--and
+		--Silenced WAY too early
+	if GetTime() < bwFaerlinaEnragedFadedTime + 5 then return end
+	
 	--Determine if the Mc faded less than 1 second after a worshipper died, if yes, then is probably a successful silence :: no trigger
 	if ((abs(bwWorshipperDiesTime - bwFaerlinaMcEndTime)) < 1) and bwFaerlinaIsEnraged == false then
 		
