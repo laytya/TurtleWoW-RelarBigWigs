@@ -131,11 +131,9 @@ end
 function module:Mc(rest)
 	self:Bar(rest..L["bar_mc"], timer.mc, icon.mc, true, color.mc)
 	
-	if IsRaidLeader() or IsRaidOfficer() then
-		if UnitClass("Player") ~= "Rogue" then
-			TargetByName(rest,true)
-			SetRaidTarget("target",6)
-			TargetLastTarget()
+	for i=1,GetNumRaidMembers() do
+		if UnitName("raid"..i) == rest then
+			SetRaidTargetIcon("raid"..i, 6)
 		end
 	end
 end

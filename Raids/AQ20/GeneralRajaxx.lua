@@ -2,7 +2,7 @@
 local module, L = BigWigs:ModuleDeclaration("General Rajaxx", "Ruins of Ahn'Qiraj")
 local andorov = AceLibrary("Babble-Boss-2.2")["Lieutenant General Andorov"]
 
-module.revision = 30025
+module.revision = 30027
 module.enabletrigger = {module.translatedName, andorov}
 module.toggleoptions = {"wave", "fear", "attackorder", "lightningcloud", "shockwave", "shield", "knockback", "enlarge", "thundercrash", "bosskill"}
 
@@ -377,21 +377,19 @@ function module:AttackOrder(rest)
 	self:Bar(rest..L["bar_attackOrder"].." >Click Me<", timer.attackOrder, icon.attackOrder, true, "Blue")
 	self:SetCandyBarOnClick("BigWigsBar "..rest..L["bar_attackOrder"].. " >Click Me<", function(name, button, extra) TargetByName(extra, true) end, rest)
 	
-	if IsRaidLeader() or IsRaidOfficer() then
-		if UnitClass("Player") ~= "Rogue" then
-			TargetByName(rest,true)
-			SetRaidTarget("target",8)
-			TargetLastTarget()
+	for i=1,GetNumRaidMembers() do
+		if UnitName("raid"..i) == rest then
+			SetRaidTarget("raid"..i, 4)
 		end
 	end
 end
 
 function module:AttackOrderFade(rest)
 	self:RemoveBar(rest..L["bar_attackOrder"].." >Click Me<")
-	if IsRaidLeader() or IsRaidOfficer() then
-		TargetByName(rest,true)
-		SetRaidTarget("target",0)
-		TargetLastTarget()
+	for i=1,GetNumRaidMembers() do
+		if UnitName("raid"..i) == rest then
+			SetRaidTarget("raid"..i, 0)
+		end
 	end
 end
 

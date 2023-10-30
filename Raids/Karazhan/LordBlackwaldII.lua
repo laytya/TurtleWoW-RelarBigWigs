@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Lord Blackwald II", "Karazhan")
 
-module.revision = 30025
+module.revision = 30027
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"reaverstorm", "boon", "empoweredsoul", "summon", "bosskill"}
 module.zonename = {
@@ -189,10 +189,10 @@ function module:BoonFade(rest)
 end
 
 function module:EmpoweredSoul(rest)
-	if IsRaidLeader() or IsRaidOfficer() then
-		TargetByName(rest,true)
-		SetRaidTarget("target",8)
-		TargetLastTarget()
+	for i=1,GetNumRaidMembers() do
+		if UnitName("raid"..i) == rest then
+			SetRaidTarget("raid"..i, 8)
+		end
 	end
 	
 	self:Bar(rest..L["bar_empoweredSoul"].. " >Click Me<", timer.empoweredSoul, icon.empoweredSoul, true, color.empoweredSoul)

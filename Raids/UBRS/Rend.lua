@@ -305,11 +305,19 @@ function module:Dismount()
 	self:Message(L["msg_dismount"], "Important", false, nil, false)
 	self:Sound("Beware")
 	
-	if (IsRaidLeader() or IsRaidOfficer()) then
-		if UnitClass("Player") ~= "Rogue" then
-			TargetByName("Warchief Rend Blackhand",true)
+	bwPlayerIsAttacking = nil
+	if IsRaidLeader() or IsRaidOfficer() then
+		if UnitClass("Player") ~= "Rogue" and UnitClass("Player") ~= "Druid" then
+			if PlayerFrame.inCombat then
+				bwPlayerIsAttacking = true
+			end
+			
+			TargetByName(rest,true)
 			SetRaidTarget("target",6)
 			TargetLastTarget()
+			if bwPlayerIsAttacking then
+				AttackTarget()
+			end
 		end
 	end
 end

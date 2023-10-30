@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("High Priestess Arlokk", "Zul'Gurub")
 
-module.revision = 30025
+module.revision = 30027
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"phase", "whirlwind", "vanish", "mark", "puticon", "bosskill"}
 
@@ -143,11 +143,9 @@ function module:Mark(rest)
 	self:Bar(rest..L["bar_mark"].. " >Click Me<", timer.mark, icon.mark, true, "Green")
 	self:SetCandyBarOnClick("BigWigsBar "..rest..L["bar_mark"].. " >Click Me<", function(name, button, extra) TargetByName(extra, true) end, rest)
 
-	if IsRaidLeader() or IsRaidOfficer() then
-		if UnitClass("Player") ~= "Rogue" then
-			TargetByName(rest,true)
-			SetRaidTarget("target",8)
-			TargetLastTarget()
+	for i=1,GetNumRaidMembers() do
+		if UnitName("raid"..i) == rest then
+			SetRaidTarget("raid"..i, 8)
 		end
 	end
 end

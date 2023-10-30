@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Ayamiss the Hunter", "Ruins of Ahn'Qiraj")
 
-module.revision = 30025
+module.revision = 30027
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"bigicon", "sacrifice", "bosskill"}
 
@@ -119,11 +119,19 @@ function module:Sacrifice(rest)
 		self:WarningSign(icon.sacrifice, 0.7)
 	end
 	
+	bwPlayerIsAttacking = nil
 	if IsRaidLeader() or IsRaidOfficer() then
-		if UnitClass("Player") ~= "Rogue" then
-			TargetByName("Hive'Zara Larva",true)
+		if UnitClass("Player") ~= "Rogue" and UnitClass("Player") ~= "Druid" then
+			if PlayerFrame.inCombat then
+				bwPlayerIsAttacking = true
+			end
+			
+			TargetByName(rest,true)
 			SetRaidTarget("target",8)
 			TargetLastTarget()
+			if bwPlayerIsAttacking then
+				AttackTarget()
+			end
 		end
 	end
 	

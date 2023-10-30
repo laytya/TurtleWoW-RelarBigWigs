@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("The Prophet Skeram", "Ahn'Qiraj")
 
-module.revision = 30025
+module.revision = 30027
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"mc", "bosskill"}
 
@@ -130,11 +130,9 @@ function module:BigWigs_RecvSync(sync, rest, nick)
 end
 
 function module:MC(rest)
-	if IsRaidLeader() or IsRaidOfficer() then
-		if UnitClass("Player") ~= "Rogue" then
-			TargetByName(rest,true)
-			SetRaidTarget("target",4)
-			TargetLastTarget()
+	for i=1,GetNumRaidMembers() do
+		if UnitName("raid"..i) == rest then
+			SetRaidTarget("raid"..i, 4)
 		end
 	end
 	

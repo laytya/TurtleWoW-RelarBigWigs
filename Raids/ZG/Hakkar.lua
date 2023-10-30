@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Hakkar", "Zul'Gurub")
 
-module.revision = 30025
+module.revision = 30027
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"mc", "siphon", "enrage", -1, "aspectjeklik", "aspectvenoxis", "aspectmarli", "aspectthekal", "aspectarlokk", "bosskill"}
 
@@ -461,11 +461,9 @@ function module:MindControl(rest)
 	self:Bar(string.format(L["mindcontrol_bar"], rest), 10, icon.mindcontrol, true, "White")
 	self:Message(string.format(L["mindcontrol_message"], rest), "Attention")
 		
-	if IsRaidLeader() or IsRaidOfficer() then
-		if UnitClass("Player") ~= "Rogue" then
-			TargetByName(rest,true)
-			SetRaidTarget("target",4)
-			TargetLastTarget()
+	for i=1,GetNumRaidMembers() do
+		if UnitName("raid"..i) == rest then
+			SetRaidTarget("raid"..i, 4)
 		end
 	end
 end

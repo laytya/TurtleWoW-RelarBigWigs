@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Anubisath Sentinel", "Ahn'Qiraj")
 
-module.revision = 30024
+module.revision = 30027
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"abilities"}
 module.trashMod = true
@@ -22,7 +22,7 @@ L:RegisterTranslations("enUS", function() return {
     mortalstrikewarn = " has Mortal Strike!",
     shadowstormwarn = " has Shadow Storm!",
     mendwarn = " has Mending!",
-    sharefwarn = "?? has Shadow and Frost!",
+    sharefwarn = " has Shadow and Frost!",
 	arcrefwarn = " has Fire and Arcane!",
 
 	trigger_arcaneFireReflect1 = "Your Moonfire is reflected back by Anubisath Defender.",--CHAT_MSG_SPELL_SELF_DAMAGE
@@ -83,11 +83,11 @@ local icon = {
 
 local color = {
 	mend = "green",
-	thorns = "green",
 	mortalstrike = "yellow",
 	sharef = "yellow",
 	arcref = "yellow",
 	knockback = "yellow",
+	thorns = "orange",
 	thunderclap = "orange",
 	manaburn = "red",
 	shadowstorm = "red",

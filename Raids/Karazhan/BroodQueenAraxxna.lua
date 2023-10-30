@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Brood Queen Araxxna", "Karazhan")
 
-module.revision = 30023
+module.revision = 30027
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"volley", "leechingbite", "egg", "bosskill"}
 module.zonename = {
@@ -158,10 +158,20 @@ function module:LeechingBiteFade(rest)
 end
 
 function module:EggSpawn()
+	bwPlayerIsAttacking = nil
 	if IsRaidLeader() or IsRaidOfficer() then
-		TargetByName("Skitterweb Egg",true)
-		SetRaidTarget("target",8)
-		TargetLastTarget()
+		if UnitClass("Player") ~= "Rogue" and UnitClass("Player") ~= "Druid" then
+			if PlayerFrame.inCombat then
+				bwPlayerIsAttacking = true
+			end
+			
+			TargetByName(rest,true)
+			SetRaidTarget("target",8)
+			TargetLastTarget()
+			if bwPlayerIsAttacking then
+				AttackTarget()
+			end
+		end
 	end
 	
 	self:Bar(L["bar_eggHatch"], timer.eggHatch, icon.eggHatch, true, color.eggHatch)
