@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Grobbulus", "Naxxramas")
 
-module.revision = 30012
+module.revision = 30027
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"slimespray", "inject", "cloud", "icon",  -1, "enrage", "bosskill"}
 
@@ -227,13 +227,17 @@ function module:Inject(rest)
 		self:Message(L["msg_injectYou"], "Personal", true, "Beware")
 	else
 		self:Message(rest..L["msg_inject"], "Personal")
-		if (IsRaidLeader() or IsRaidOfficer()) then
-			SendChatMessage("Inject on you!","WHISPER",nil,rest)
-		end
+		--if (IsRaidLeader() or IsRaidOfficer()) then
+		--	SendChatMessage("Inject on you!","WHISPER",nil,rest)
+		--end
 	end
 	self:Bar(rest..L["bar_injected"], timer.injectDuration, icon.inject, true, "Red")
 	if self.db.profile.icon then
-		self:Icon(rest)
+		for i=1,GetNumRaidMembers() do
+			if UnitName("raid"..i) == rest then
+				SetRaidTarget("raid"..i, 8)
+			end
+		end
 	end
 end
 

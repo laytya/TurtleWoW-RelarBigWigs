@@ -1,11 +1,9 @@
 
--- trigger for spore spawn missing
-
 local module, L = BigWigs:ModuleDeclaration("Loatheb", "Naxxramas")
 
-module.revision = 20004
+module.revision = 30028
 module.enabletrigger = module.translatedName
-module.toggleoptions = {"doom", "curse", "spore", "groups", "debuff", -1, "consumable", "graphic", "sound", "bosskill"}
+module.toggleoptions = {"doom", "curse", "spore", "groups", "debuff", "corruptedmind", -1, "consumable", "graphic", "sound", "bosskill"}
 
 L:RegisterTranslations("enUS", function() return {
 	cmd = "Loatheb",
@@ -29,7 +27,12 @@ L:RegisterTranslations("enUS", function() return {
 	groups_cmd = "groups",
 	groups_name = "Spore groups",
 	groups_desc = "Disable to show group numbers on spore timer (7 Group tactic)",
-
+	
+	corruptedmind_cmd = "corruptedmind",
+	corruptedmind_name = "Your own Corrupted Mind Timer",
+	corruptedmind_desc = "Timer for your own Corrupted Mind debuff",
+	
+	
 	doombar = "Inevitable Doom %d",
 	doomwarn = "Inevitable Doom %d! %d sec to next!",
 	doomwarn5sec = "Inevitable Doom %d in 5 sec!",
@@ -47,7 +50,11 @@ L:RegisterTranslations("enUS", function() return {
 	cursetimerwarn = "Curses removed, next in %s seconds!",
 
 	startwarn = "Loatheb engaged, 2 min to Inevitable Doom!",
-
+	
+	trigger_corruptedMind = "You are afflicted by Corrupted Mind.",--CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE
+	bar_corruptedMind = "Your Corrupted Mind",
+	trigger_corruptedMindFade = "Corrupted Mind fades from you.",--CHAT_MSG_SPELL_AURA_GONE_SELF
+	
 	--sporewarn = "Spore spawned",
 	sporebar = "Next Spore %d",
 	sporebar_group = "Next Spore - Group %d",
@@ -172,6 +179,7 @@ local timer = {
 	firstCurse = 5,
 	curse = 30,
 	getNextSpore = 20,
+	corruptedMind = 60,
 }
 local icon = {
 	softEnrage = "Spell_Shadow_UnholyFrenzy",
@@ -179,6 +187,10 @@ local icon = {
 	spore = "Ability_TheBlackArrow",
 	sieni = "Interface\\AddOns\\\BigWigs\\Textures\\sieni",
 	curse = "Spell_Holy_RemoveCurse",
+	corruptedMind = "spell_shadow_auraofdarkness",
+}
+local color = {
+	corruptedMind = "Cyan",
 }
 local syncName = {
 	doom = "LoathebDoom"..module.revision,
@@ -190,11 +202,12 @@ local numSpore = 0 -- how many spores have been spawned
 local numDoom = 0 -- how many dooms have been casted
 
 function module:OnEnable()
-	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE", "Event")
+	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE", "Event")--trigger_corruptedMind
+	self:RegisterEvent("CHAT_MSG_SPELL_AURA_GONE_SELF", "Event")--trigger_corruptedMindFade
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_FRIENDLYPLAYER_DAMAGE", "Event")
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_PARTY_DAMAGE", "Event")
 	self:RegisterEvent("CHAT_MSG_SPELL_BREAK_AURA", "CurseEvent")
-
+	
 	-- 2: Doom and SporeSpawn versioned up because of the sync including the
 	-- doom/spore count now, so we don't hold back the counter.
 	self:ThrottleSync(10, syncName.doom)
@@ -276,6 +289,11 @@ end
 function module:Event( msg )
 	if string.find(msg, L["doomtrigger"]) then
 		self:Sync(syncName.doom .. " " .. tostring(numDoom + 1))
+	elseif msg == L["trigger_corruptedMind"] then
+		self:Bar(L["bar_corruptedMind"], timer.corruptedMind, icon.corruptedMind, true, color.corruptedMind)
+	elseif msg == L["trigger_corruptedMindFade"] then
+		self:RemoveBar(L["bar_corruptedMind"])
+		self:WarningSign(icon.corruptedMind, 0.7)
 	end
 end
 
