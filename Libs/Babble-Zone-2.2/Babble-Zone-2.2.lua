@@ -28,6 +28,7 @@ local BabbleZone = AceLibrary("AceLocale-2.2"):new(MAJOR_VERSION)
 
 BabbleZone:RegisterTranslations("enUS", function()
 	return {
+		["The Black Morass"] = true,
 		["Blackrock Spire"] = true,
 		["Alah'thalas"] = true,
 		["Amani'alor"] = true,

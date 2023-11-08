@@ -74,6 +74,7 @@ L:RegisterTranslations("enUS", function() return {
 	["Karazhan"] = "Karazhan",
 	["Dire Maul"] = "DireMaul",
 	["Blackrock Spire"] = "BlackrockSpire",
+	["The Black Morass"] = "BlackMorass",
 	["Onyxia's Lair"] = "Onyxia",
 	["Silithus"] = true,
 	["Outdoor Raid Bosses"] = "Outdoor",
@@ -239,7 +240,7 @@ BigWigs.cmdtable = {type = "group", handler = BigWigs, args = {
 }}
 BigWigs:RegisterChatCommand({"/bw", "/BigWigs"}, BigWigs.cmdtable)
 BigWigs.debugFrame = ChatFrame1
-BigWigs.revision = 30028
+BigWigs.revision = 30029
 
 
 function BigWigs:DebugMessage(msg, module)

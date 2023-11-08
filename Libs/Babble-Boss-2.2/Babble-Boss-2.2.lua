@@ -28,6 +28,13 @@ local BabbleBoss = AceLibrary("AceLocale-2.2"):new(MAJOR_VERSION)
 
 BabbleBoss:RegisterTranslations("enUS", function()
 	return {
+		["Rotmaw"] = true,
+		["Antnormi"] = true,
+		["Mossheart"] = true,
+		["Time-Lord Epochronos"] = true,
+		["Drifting Avatar of Sand"] = true,
+		["Epidamu"] = true,
+		["Chronar"] = true,
 		["Rookery Hatcher"] = true,
 		["Rookery Guardian"] = true,
 		["Sanctum Dragonkin"] = true,

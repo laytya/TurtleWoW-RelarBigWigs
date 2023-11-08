@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Solnius", "Emerald Sanctum")
 
-module.revision = 30020
+module.revision = 30029
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"transitions", "bosskill"}--"wailoferennius", "howloferennius", "volley", 
 module.zonename = {
@@ -46,7 +46,7 @@ L:RegisterTranslations("enUS", function() return {
 	trigger_solniusSleep = "Solnius gains Sleep Visual DND.",--CHAT_MSG_SPELL_PERIODIC_CREATURE_BUFFS
 	trigger_solniusSleepFade = "Sleep Visual DND fades from Solnius.",--CHAT_MSG_SPELL_AURA_GONE_OTHER
 	bar_isSleeping = "Solnius is Sleeping",
-	msg_isSleeping = "3Wyrmkin 2Dreamer Incoming! 45sec to kill",
+	msg_isSleeping = "Mobs Incoming! 45sec to kill",
 	msg_isSleepingFade = "Solnius is Awake!",
 	
 	--[[Erennius vv

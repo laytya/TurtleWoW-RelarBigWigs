@@ -1,6 +1,6 @@
 ## Interface: 11200
 
-## Title: |cFFFF8080Relar|r Big Wigs |cff7fff7f30028|r |cffabd473Turtle-WoW|r
+## Title: |cFFFF8080Relar|r Big Wigs |cff7fff7f30029|r |cffabd473Turtle-WoW|r
 ## Title-zhCN: |cffabd473Turtle-WoW|r Big Wigs
 ## Notes: Boss Mods with Timer bars.
 ## Notes-esES: Módulos para Jefes con barras temporizadoras.
@@ -184,6 +184,14 @@ Raids\UBRS\Drakkisath.lua
 Raids\UBRS\Emberseer.lua
 Raids\UBRS\Rend.lua
 Raids\UBRS\Solakar.lua
+
+Raids\BlackMorass\Chronar.lua
+Raids\BlackMorass\Epidamu.lua
+Raids\BlackMorass\DriftingAvatarOfSand.lua
+Raids\BlackMorass\TimeLordEpochronos.lua
+Raids\BlackMorass\Mossheart.lua
+Raids\BlackMorass\Antnormi.lua
+Raids\BlackMorass\Rotmaw.lua
 
 Raids\EmeraldSanctum\Erennius.lua
 Raids\EmeraldSanctum\Solnius.lua
