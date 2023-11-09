@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Gluth", "Naxxramas")
 
-module.revision = 30012
+module.revision = 30030
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"frenzy", "fear", "decimate", "enrage", "zombies", -1, "bosskill"}
 
@@ -111,7 +111,8 @@ local timer = {
 	decimate = 105,
 	zombie = 6,
 	enrage = 330,
-	fear = 20,
+	firstfear = 20,
+	fear = 15,
 	frenzy = 10,
 }
 local icon = {
@@ -172,7 +173,7 @@ function module:OnEngage()
 		self:DelayedMessage(timer.decimate - 5, L["msg_decimate5"], "Urgent")
 	end
 	if self.db.profile.fear then
-		self:Bar(L["bar_fearCD"], timer.fear, icon.fear, true, "Blue")
+		self:Bar(L["bar_fearCD"], timer.firstfear, icon.fear, true, "Blue")
 	end
 	
 	
