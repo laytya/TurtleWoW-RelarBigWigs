@@ -1,7 +1,7 @@
 
 local module, L = BigWigs:ModuleDeclaration("Princess Huhuran", "Ahn'Qiraj")
 
-module.revision = 30032
+module.revision = 30033
 module.enabletrigger = module.translatedName
 module.toggleoptions = {"wyvernsting", "frenzy", "noxiouspoison", "berserk", "enrage", "bosskill"}
 
@@ -99,7 +99,7 @@ local syncName = {
 local lastFrenzy = 0
 
 function module:OnEnable()
-	self:RegisterEvent("CHAT_MSG_SAY", "Event")--Debug
+	--self:RegisterEvent("CHAT_MSG_SAY", "Event")--Debug
 	
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_SELF_DAMAGE", "Event")--trigger_wyvernSting, trigger_noxiousPoison,trigger_noxiousPoisonYou , trigger_wyvernStingYou
 	self:RegisterEvent("CHAT_MSG_SPELL_PERIODIC_PARTY_DAMAGE", "Event")--trigger_wyvernSting, trigger_noxiousPoison
@@ -140,22 +140,15 @@ function module:OnDisengage()
 end
 
 function module:Event(msg)
-	if msg == "force" then
-		module:SendEngageSync()
-	end
-	
-	
 	if msg == L["trigger_noxiousPoisonYou"] then
 		self:WarningSign(icon.noxiousPoison, timer.noxiousPoisonDuration)
-	end
-	if msg == L["trigger_noxiousPoisonYouFade"] then
+	elseif msg == L["trigger_noxiousPoisonYouFade"] then
 		self:RemoveWarningSign(icon.noxiousPoison)
 	end
 	
 	if msg == L["trigger_wyvernStingYou"] then
 		self:WarningSign(icon.wyvernSting, timer.wyvernStingDuration)
-	end
-	if msg == L["trigger_wyvernStingYouFade"] then
+	elseif msg == L["trigger_wyvernStingYouFade"] then
 		self:RemoveWarningSign(icon.wyvernSting)
 	end
 	
