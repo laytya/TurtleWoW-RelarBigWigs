@@ -489,11 +489,13 @@ function module:AspectVenoxis()
 end
 
 function module:AspectMarli(rest)
+	if UnitName("Player") == "Relar" then DEFAULT_CHAT_FRAME:AddMessage("AspectMarli: "..rest) end
 	self:Bar(string.format(L["aspectmarlidebuff_bar"], rest), 6, icon.marli, true, "Yellow")
 	self:DelayedBar(6, L["aspectmarli_bar"], 4, icon.marli, true, "Yellow")
 end
 
 function module:AspectMarliAvoid()
+	if UnitName("Player") == "Relar" then DEFAULT_CHAT_FRAME:AddMessage("AspectMarliAvoid") end
 	self:Bar(L["aspectmarli_bar"], 10, icon.marli, true, "Yellow")
 end
 

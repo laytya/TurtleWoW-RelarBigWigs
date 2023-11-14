@@ -1,9 +1,9 @@
 
 local module, L = BigWigs:ModuleDeclaration("Jin'do the Hexxer", "Zul'Gurub")
 
-module.revision = 30012
+module.revision = 30034
 module.enabletrigger = module.translatedName
-module.toggleoptions = {"curse", "hex", "brainwash", "healingward", "puticon", "bosskill"}
+module.toggleoptions = {"curse", "hex", "brainwash", "healingward", "puticon", "autotarget", "bosskill"}
 
 L:RegisterTranslations("enUS", function() return {
 	cmd = "Jindo",
@@ -27,6 +27,10 @@ L:RegisterTranslations("enUS", function() return {
 	puticon_cmd = "puticon",
 	puticon_name = "Raid icon on cursed players",
 	puticon_desc = "Place a raid icon on the player with Delusions of Jin'do.\n\n(Requires assistant or higher)",
+	
+	autotarget_cmd = "autotarget",
+	autotarget_name = "Autotargetting of Totems",
+	autotarget_desc = "Autotargetting of Totems",
 	
 	trigger_engage = "Welcome to the great show, friends. Step right up to die!",--CHAT_MSG_MONSTER_YELL
 	
@@ -203,17 +207,17 @@ function module:HexFade(rest)
 end
 
 function module:BrainWash()
-	if UnitClass("Player") == "Warrior" then
+	if UnitClass("Player") == "Warrior" and self.db.profile.autotarget then
 		TargetByName("Brain Wash Totem", true)
-	elseif UnitClass("Player") == "Rogue" then
+	elseif UnitClass("Player") == "Rogue" and self.db.profile.autotarget then
 		TargetByName("Brain Wash Totem", true)
-	elseif UnitClass("Player") == "Hunter" then
+	elseif UnitClass("Player") == "Hunter" and self.db.profile.autotarget then
 		TargetByName("Brain Wash Totem", true)
-	elseif UnitClass("Player") == "Mage" then
+	elseif UnitClass("Player") == "Mage" and self.db.profile.autotarget then
 		TargetByName("Brain Wash Totem", true)
-	elseif UnitClass("Player") == "Warlock" then
+	elseif UnitClass("Player") == "Warlock" and self.db.profile.autotarget then
 		TargetByName("Brain Wash Totem", true)
-	elseif UnitClass("Player") == "Warrior" then
+	elseif UnitClass("Player") == "Warrior" and self.db.profile.autotarget then
 		TargetByName("Brain Wash Totem", true)
 	end
 	
@@ -222,17 +226,17 @@ function module:BrainWash()
 end
 
 function module:HealingWard()
-	if UnitClass("Player") == "Warrior" then
+	if UnitClass("Player") == "Warrior" and self.db.profile.autotarget then
 		TargetByName("Powerful Healing Ward", true)
-	elseif UnitClass("Player") == "Rogue" then
+	elseif UnitClass("Player") == "Rogue" and self.db.profile.autotarget then
 		TargetByName("Powerful Healing Ward", true)
-	elseif UnitClass("Player") == "Hunter" then
+	elseif UnitClass("Player") == "Hunter" and self.db.profile.autotarget then
 		TargetByName("Powerful Healing Ward", true)
-	elseif UnitClass("Player") == "Mage" then
+	elseif UnitClass("Player") == "Mage" and self.db.profile.autotarget then
 		TargetByName("Powerful Healing Ward", true)
-	elseif UnitClass("Player") == "Warlock" then
+	elseif UnitClass("Player") == "Warlock" and self.db.profile.autotarget then
 		TargetByName("Powerful Healing Ward", true)
-	elseif UnitClass("Player") == "Warrior" then
+	elseif UnitClass("Player") == "Warrior" and self.db.profile.autotarget then
 		TargetByName("Powerful Healing Ward", true)
 	end
 	
