@@ -666,7 +666,7 @@ end
 function BigWigsBars:BigWigs_SetCounterBar(module, text, value)
     if (not text) or (value == nil) or (value < 0) then return end
     local id = "BigWigsBar " .. text
-    local bar = candybar.var.handlers[id]
+    local bar = candybar.handlers[id]
     if not bar then return end
     bar.elapsed = value
     candybar:Update(id)
@@ -701,7 +701,7 @@ end
 function BigWigsBars:BigWigs_SetHPBar(module, text, value)
     if (not text) or (value == nil) or (value < 0) then return end
     local id = "BigWigsBar " .. text
-    local bar = candybar.var.handlers[id]
+    local bar = candybar.handlers[id]
     if not bar then return end
     bar.elapsed = value
     candybar:Update(id)
