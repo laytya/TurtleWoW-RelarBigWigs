@@ -8,7 +8,7 @@ assert(BigWigs, "BigWigs not found!")
 local L = AceLibrary("AceLocale-2.2"):new("BigWigsBars")
 local paint = AceLibrary("PaintChips-2.0")
 local minscale, maxscale = 0.25, 2
-local candybar = AceLibrary("CandyBar-2.1")
+local candybar = AceLibrary("CandyBar-2.0")
 
 local surface = AceLibrary("Surface-1.0")
 
@@ -754,7 +754,7 @@ flashBarUp = function(id)
     --self:SetCandyBarBackgroundColor(id, bg.r, bg.g, bg.b, bg.a)
     local r, g, b, a = unpack(flashColors[currentColor[id]])
     --BigWigsBars:SetCandyBarBackgroundColor(id, unpack(flashColors[currentColor[id]]))
-    BigWigsBars:SetCandyBarBackgroundColorRGB(id, r, g, b, a)
+    BigWigsBars:SetCandyBarBackgroundColor(id, r, g, b, a)
     --if currentColor[id] == #flashColors then
     if currentColor[id] == tablelength(flashColors) then
         BigWigsBars:ScheduleRepeatingEvent(id, flashBarDown, 0.1, id)
@@ -765,7 +765,7 @@ end
 flashBarDown = function(id)
     local r, g, b, a = unpack(flashColors[currentColor[id]])
     --BigWigsBars:SetCandyBarBackgroundColor(id, unpack(flashColors[currentColor[id]]))
-    BigWigsBars:SetCandyBarBackgroundColorRGB(id, r, g, b, a)
+    BigWigsBars:SetCandyBarBackgroundColor(id, r, g, b, a)
     if currentColor[id] == 1 then
         BigWigsBars:ScheduleRepeatingEvent(id, flashBarUp, 0.1, id)
         return

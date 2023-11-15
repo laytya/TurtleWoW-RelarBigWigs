@@ -1390,8 +1390,6 @@ function CandyBar:activate(oldLib, oldDeactivate)
 
 	if oldLib then self.var = oldLib.var
 	else
-		local _,_,ourpath = string.find(debugstack(), "\\AddOns\\(.-)CandyBar%-2%.1%.lua")
-		ourpath = "Interface\\AddOns\\"..ourpath .. "bar.tga"
 		self.var = {  -- "Local" variables go here
 			frame = CreateFrame("Frame"),
 			handlers = {},
